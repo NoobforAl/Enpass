@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -66,7 +65,6 @@ func (sp *savedPass) deletePass(id uint) {
 			sp.mux.Lock()
 			defer sp.mux.Unlock()
 			delete(sp.passwords, id)
-			fmt.Println("deleted")
 			return
 		}
 	}
