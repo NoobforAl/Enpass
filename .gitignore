@@ -25,3 +25,6 @@ go.work
 
 # sqlite databas
 *.sqlite
+
+# .env file
+.env
