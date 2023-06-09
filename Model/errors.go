@@ -3,8 +3,8 @@ package model
 import "errors"
 
 var (
-	EncryptError     = errors.New("encrypt Error:")
-	DecryptError     = errors.New("decrypt Error:")
-	ErrHashNotMatch  = errors.New("hash not match")
-	TextIsShortError = errors.New("text too short")
+	ErrEncrypt      = errors.New("encrypt Error:")
+	ErrDecrypt      = errors.New("decrypt Error:")
+	ErrHashNotMatch = errors.New("hash not match")
+	ErrTextIsShort  = errors.New("text too short")
 )
