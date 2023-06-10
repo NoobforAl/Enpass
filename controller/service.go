@@ -13,7 +13,7 @@ func NewService(c *gin.Context) {
 	var ser schema.Service
 	var err error
 
-	if err = c.BindJSON(&ser); err != nil {
+	if err = ser.Pars(c); err != nil {
 		errorHandling(c, err)
 		return
 	}
@@ -48,7 +48,7 @@ func UpdateService(c *gin.Context) {
 	var ser schema.UpdateService
 	var err error
 
-	if err = c.BindJSON(&ser); err != nil {
+	if err = ser.Pars(c); err != nil {
 		errorHandling(c, err)
 		return
 	}

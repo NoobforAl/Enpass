@@ -27,7 +27,7 @@ func init() {
 
 func Login(c *gin.Context) {
 	var loginVal schema.Login
-	if err := c.BindJSON(&loginVal); err != nil {
+	if err := loginVal.Pars(c); err != nil {
 		errorHandling(c, err)
 		return
 	}
@@ -67,7 +67,7 @@ func UpdateUserPass(c *gin.Context) {
 	var pass schema.UpdateUserPass
 	var err error
 
-	if err = c.BindJSON(&pass); err != nil {
+	if err = pass.Pars(c); err != nil {
 		errorHandling(c, err)
 		return
 	}

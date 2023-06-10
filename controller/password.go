@@ -15,7 +15,7 @@ func NewPass(c *gin.Context) {
 	var pass schema.Pass
 	var err error
 
-	if err = c.BindJSON(&pass); err != nil {
+	if err = pass.Pars(c); err != nil {
 		errorHandling(c, err)
 		return
 	}
@@ -99,7 +99,7 @@ func UpdatePass(c *gin.Context) {
 	var pass schema.UpdatePass
 	var err error
 
-	if err = c.BindJSON(&pass); err != nil {
+	if err = pass.Pars(c); err != nil {
 		errorHandling(c, err)
 		return
 	}

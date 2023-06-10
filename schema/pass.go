@@ -1,5 +1,7 @@
 package schema
 
+import "github.com/gin-gonic/gin"
+
 type Pass struct {
 	ServiceID uint   `form:"serviceid" json:"serviceid" binding:"required"`
 	UserName  string `form:"username" json:"username" binding:"required"`
@@ -10,4 +12,12 @@ type Pass struct {
 type UpdatePass struct {
 	Pass
 	PassID uint `form:"passid" json:"passid" binding:"required"`
+}
+
+func (p *Pass) Pars(c *gin.Context) error {
+	return parsJsonAndValidate(c, p)
+}
+
+func (u *UpdatePass) Pars(c *gin.Context) error {
+	return parsJsonAndValidate(c, u)
 }
