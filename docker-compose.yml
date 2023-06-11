@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+  app:
+    image: enpass:latest
+    ports:
+      - 1111:1111
+    restart: always
+    environment:
+      - DSN=/app/db.sqlite
+      - LIFETIME=10
+      - GIN_MODE=release

@@ -1,0 +1,11 @@
+/tmp
+*.sqlite
+docker-compose.yml
+Dockerfile
+LICENSE
+README.md
+.gitignore
+.air.toml
+/test
+/postman
+.env.example
