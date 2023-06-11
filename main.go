@@ -1,42 +1,43 @@
 package main
 
 import (
-	"github.com/NoobforAl/Enpass/Db"
 	"github.com/NoobforAl/Enpass/controller"
+	"github.com/NoobforAl/Enpass/database"
 	env "github.com/NoobforAl/Enpass/loadEnv"
-	"github.com/NoobforAl/Enpass/logger"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	if _, err := Db.InitDB(env.GetDSN()); err != nil {
+	stor, err := database.New(env.GetDSN())
+	if err != nil {
 		panic(err)
 	}
 
-	r := gin.New()
-	r.Use(logger.NewLogger())
-
-	r.POST("/login", controller.Login)
+	r := gin.Default()
 	r.GET("/genRandomPass", controller.GenRandomPass)
+	r.POST("/login", controller.Login(stor))
 
 	api := r.Group("/api")
 	api.Use(controller.AuthMiddleware())
 	{
-		api.GET("/pass/:id", controller.FindPass)
-		api.GET("/service/:id", controller.FindService)
+		api.GET("/allPass", controller.AllPass(stor))
+		api.GET("/allService", controller.AllService(stor))
 
-		api.PUT("/updatePass", controller.UpdatePass)
-		api.PUT("/updateService", controller.UpdateService)
-		api.PUT("/updateUserPass", controller.UpdateUserPass)
+		api.GET("/pass/:id", controller.FindPass(stor))
+		api.GET("/service/:id", controller.FindService(stor))
 
-		api.POST("/createPass", controller.NewPass)
-		api.POST("/createService", controller.NewService)
+		api.POST("/createPass", controller.NewPass(stor))
+		api.POST("/createService", controller.NewService(stor))
 
-		api.DELETE("/deletePass/:id", controller.DeletePassWord)
-		api.DELETE("/deleteService/:id", controller.DeleteService)
+		api.PUT("/updateUser", controller.UpdateUser(stor))
+		api.PUT("/updatePass", controller.UpdatePass(stor))
+		api.PUT("/updateService", controller.UpdateService(stor))
+
+		api.DELETE("/deletePass/:id", controller.DeletePassWord(stor))
+		api.DELETE("/deleteService/:id", controller.DeleteService(stor))
 	}
 
-	if err := r.Run("127.0.0.1:1111"); err != nil {
+	if err := r.Run("0.0.0.0:1111"); err != nil {
 		panic(err)
 	}
 }
