@@ -3,160 +3,128 @@ package controller
 import (
 	"net/http"
 
-	"github.com/NoobforAl/Enpass/Db"
-	model "github.com/NoobforAl/Enpass/Model"
-	"github.com/NoobforAl/Enpass/schema"
+	"github.com/NoobforAl/Enpass/contract"
+	"github.com/NoobforAl/Enpass/entity"
 	"github.com/gin-gonic/gin"
 )
 
-func NewPass(c *gin.Context) {
-	userID := getUserID(c)
+func NewPass(stor contract.Stor) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := getUserID(c)
+		password := entity.Pass{UserID: userID}
+		var err error
 
-	var pass schema.Pass
-	var err error
+		if err = password.Pars(c); err != nil {
+			errorHandling(c, err)
+			return
+		}
 
-	if err = pass.Pars(c); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	err = Db.Get(&model.Service{ID: pass.ServiceID})
-	if err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	values := model.Values{
-		UserName: model.Value(pass.UserName),
-		Password: model.Value(pass.Password),
-		Note:     model.Value(pass.Note),
-	}
-
-	p, err := cachedPass.getPass(userID)
-	if err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	if err = values.EncryptValues(p); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	newPass := model.SavedPassword{
-		UserPassID: uint(userID),
-		ServiceID:  pass.ServiceID,
-		Values:     values,
-	}
-
-	if err = Db.Insert(&newPass); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, pass)
-}
-
-func FindPass(c *gin.Context) {
-	userID := getUserID(c)
-
-	decrypt := c.Query("decrypt")
-	passId, err := getParmInt(c, "id")
-	if err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	pass := model.SavedPassword{ID: uint(passId), UserPassID: uint(userID)}
-	if err = Db.Get(&pass); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	if decrypt == "true" {
 		p, err := cachedPass.getPass(userID)
 		if err != nil {
 			errorHandling(c, err)
 			return
 		}
 
-		if err = pass.Values.DecryptValues(p); err != nil {
+		if err = password.CreatePass(c, stor, p); err != nil {
 			errorHandling(c, err)
 			return
 		}
-	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"UserName": pass.UserName,
-		"Password": pass.Password,
-		"Note":     pass.Note,
-	})
+		c.JSON(http.StatusOK, password)
+	}
 }
 
-func UpdatePass(c *gin.Context) {
-	userId := getUserID(c)
+func AllPass(stor contract.Stor) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := getUserID(c)
+		var pass entity.Pass
 
-	var pass schema.UpdatePass
-	var err error
+		p, err := cachedPass.getPass(userID)
+		if err != nil {
+			errorHandling(c, err)
+			return
+		}
 
-	if err = pass.Pars(c); err != nil {
-		errorHandling(c, err)
-		return
+		passwords, err := pass.GetAllPassword(c, stor, p, true)
+		if err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, passwords)
 	}
-
-	values := model.Values{
-		UserName: model.Value(pass.UserName),
-		Password: model.Value(pass.Password),
-		Note:     model.Value(pass.Note),
-	}
-
-	p, err := cachedPass.getPass(userId)
-	if err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	if err = values.EncryptValues(p); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	updatePass := model.SavedPassword{
-		ID:         pass.PassID,
-		UserPassID: uint(userId),
-		ServiceID:  pass.ServiceID,
-	}
-
-	if err = Db.Get(&updatePass); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	updatePass.Values = values
-	if err = Db.Update(&updatePass); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, pass)
 }
 
-func DeletePassWord(c *gin.Context) {
-	userID := getUserID(c)
+func FindPass(stor contract.Stor) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := getUserID(c)
 
-	passId, err := getParmInt(c, "id")
-	if err != nil {
-		errorHandling(c, err)
-		return
+		decrypt := c.Query("decrypt")
+		passId, err := getParmInt(c, "id")
+		if err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		p, err := cachedPass.getPass(userID)
+		if err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		password := entity.Pass{UserID: userID, PassID: uint(passId)}
+		if err = password.FindPassword(c, stor, p, decrypt == "true"); err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, password)
 	}
+}
 
-	if err = Db.Delete(&model.SavedPassword{
-		ID:         uint(passId),
-		UserPassID: uint(userID),
-	}); err != nil {
-		errorHandling(c, err)
-		return
+func UpdatePass(stor contract.Stor) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userId := getUserID(c)
+
+		var pass entity.Pass
+		var err error
+
+		if err = pass.Pars(c); err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		p, err := cachedPass.getPass(userId)
+		if err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		if err = pass.UpdatePass(c, stor, p); err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, pass)
 	}
+}
 
-	c.JSON(http.StatusOK, gin.H{"message": "record deleted"})
+func DeletePassWord(stor contract.Stor) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := getUserID(c)
+
+		passId, err := getParmInt(c, "id")
+		if err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		password := entity.Pass{PassID: uint(passId), UserID: userID}
+		if err = password.DeletePass(c, stor); err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "record deleted"})
+	}
 }

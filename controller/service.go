@@ -3,94 +3,95 @@ package controller
 import (
 	"net/http"
 
-	"github.com/NoobforAl/Enpass/Db"
-	model "github.com/NoobforAl/Enpass/Model"
-	"github.com/NoobforAl/Enpass/schema"
+	"github.com/NoobforAl/Enpass/contract"
+	"github.com/NoobforAl/Enpass/entity"
 	"github.com/gin-gonic/gin"
 )
 
-func NewService(c *gin.Context) {
-	var ser schema.Service
-	var err error
+func NewService(stor contract.Stor) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ser entity.Service
+		var err error
 
-	if err = ser.Pars(c); err != nil {
-		errorHandling(c, err)
-		return
+		if err = ser.Pars(c); err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		if err = ser.CreateService(c, stor); err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, ser)
 	}
-
-	service := model.Service{Name: model.Value(ser.Name)}
-	if err = Db.Insert(&service); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, service)
 }
 
-func FindService(c *gin.Context) {
-	serviceId, err := getParmInt(c, "id")
+func AllService(stor contract.Stor) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ser entity.Service
+		services, err := ser.GetAllService(c, stor)
+		if err != nil {
+			errorHandling(c, err)
+			return
+		}
 
-	if err != nil {
-		errorHandling(c, err)
-		return
+		c.JSON(http.StatusOK, services)
 	}
-
-	service := model.Service{ID: uint(serviceId)}
-	if err = Db.Get(&service); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, service)
 }
 
-func UpdateService(c *gin.Context) {
-	var ser schema.UpdateService
-	var err error
+func FindService(stor contract.Stor) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		serviceId, err := getParmInt(c, "id")
+		if err != nil {
+			errorHandling(c, err)
+			return
+		}
 
-	if err = ser.Pars(c); err != nil {
-		errorHandling(c, err)
-		return
+		ser := &entity.Service{ServiceId: uint(serviceId)}
+		ser, err = ser.FindService(c, stor)
+		if err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, ser)
 	}
-
-	updateService := model.Service{ID: ser.ServiceId}
-	if err = Db.Get(&updateService); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	updateService.Name = model.Value(ser.Name)
-	if err = Db.Update(&updateService); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, updateService)
 }
 
-func DeleteService(c *gin.Context) {
-	serviceId, err := getParmInt(c, "id")
-	if err != nil {
-		errorHandling(c, err)
-		return
-	}
+func UpdateService(stor contract.Stor) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ser entity.Service
+		var err error
 
-	err = Db.Delete(&model.Service{ID: uint(serviceId)})
-	if err != nil {
-		errorHandling(c, err)
-		return
-	}
+		if err = ser.Pars(c); err != nil {
+			errorHandling(c, err)
+			return
+		}
 
-	data, err := Db.GetMany(&model.SavedPassword{ServiceID: uint(serviceId)})
-	if err != nil {
-		errorHandling(c, err)
-		return
-	}
+		if err = ser.UpdateService(c, stor); err != nil {
+			errorHandling(c, err)
+			return
+		}
 
-	if err = Db.DeleteMany(data); err != nil {
-		errorHandling(c, err)
-		return
+		c.JSON(http.StatusOK, ser)
 	}
+}
 
-	c.JSON(http.StatusOK, gin.H{"message": "record deleted"})
+func DeleteService(stor contract.Stor) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		serviceId, err := getParmInt(c, "id")
+		if err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		ser := entity.Service{ServiceId: uint(serviceId)}
+		if err = ser.DeleteService(c, stor); err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, ser)
+	}
 }

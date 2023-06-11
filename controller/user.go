@@ -8,10 +8,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/NoobforAl/Enpass/Db"
-	model "github.com/NoobforAl/Enpass/Model"
+	"github.com/NoobforAl/Enpass/contract"
+	"github.com/NoobforAl/Enpass/entity"
 	env "github.com/NoobforAl/Enpass/loadEnv"
-	"github.com/NoobforAl/Enpass/schema"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
@@ -25,114 +24,6 @@ func init() {
 	}
 }
 
-func Login(c *gin.Context) {
-	var loginVal schema.Login
-	if err := loginVal.Pars(c); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	password := loginVal.Password
-	data, err := Db.GetMany(&model.UserPass{})
-	if err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	for _, v := range data {
-		val, err := v.EnPass.DecryptValue(password)
-		if err == nil && val.IsOkHash(password) {
-			t, err := generateToken(v.ID)
-			if err != nil {
-				errorHandling(c, err)
-				return
-			}
-
-			if _, err := cachedPass.getPass(v.ID); err != nil {
-				go cachedPass.deletePass(v.ID)
-			}
-
-			cachedPass.setPass(v.ID, password)
-			c.JSON(http.StatusOK, gin.H{"token": t})
-			return
-		}
-	}
-
-	errorHandling(c, Db.ErrRecordNotFound)
-}
-
-func UpdateUserPass(c *gin.Context) {
-	userId := getUserID(c)
-
-	var pass schema.UpdateUserPass
-	var err error
-
-	if err = pass.Pars(c); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	oldPass, err := cachedPass.getPass(userId)
-	if err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	userPass := model.UserPass{
-		ID:     uint(userId),
-		EnPass: model.Value(pass.Password),
-	}
-
-	userPass.EnPass = userPass.EnPass.HashSha256()
-	userPass.EnPass, err = userPass.EnPass.EncryptValue(pass.Password)
-	if err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	if err = Db.Update(&userPass); err != nil {
-		errorHandling(c, err)
-		return
-	}
-
-	allPass, err := Db.GetMany(&model.SavedPassword{UserPassID: uint(userId)})
-	if err != nil {
-		userPass.EnPass = model.Value(oldPass)
-		userPass.EnPass = userPass.EnPass.HashSha256()
-		userPass.EnPass, _ = userPass.EnPass.EncryptValue(pass.Password)
-		e := Db.Update(&userPass)
-		if e != nil {
-			err = errors.Join(err, e)
-		}
-
-		errorHandling(c, err)
-		return
-	}
-
-	for i := range allPass {
-		_ = allPass[i].Values.DecryptValues(oldPass)
-		_ = allPass[i].Values.EncryptValues(pass.Password)
-	}
-
-	if err = Db.UpdateMany(allPass); err != nil {
-		userPass.EnPass = model.Value(oldPass)
-		userPass.EnPass = userPass.EnPass.HashSha256()
-		userPass.EnPass, _ = userPass.EnPass.EncryptValue(pass.Password)
-		e := Db.Update(&userPass)
-		if e != nil {
-			err = errors.Join(err, e)
-		}
-
-		c.JSON(http.StatusBadRequest, gin.H{
-			"detail": err.Error(),
-		})
-		return
-	}
-
-	cachedPass.setPass(userId, pass.Password)
-	c.JSON(http.StatusBadRequest, allPass)
-}
-
 func GenRandomPass(c *gin.Context) {
 	const (
 		sizeAllChar = 88
@@ -142,7 +33,7 @@ func GenRandomPass(c *gin.Context) {
 	)
 
 	size, _ := getQueryInt(c, "size")
-	if size == 0 {
+	if size <= 0 || size > 1000 {
 		size = 10
 	}
 
@@ -154,6 +45,15 @@ func GenRandomPass(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"password": string(passWord),
 	})
+}
+
+func generateToken(id uint) (string, error) {
+	claims := jwt.MapClaims{
+		"id":  id,
+		"exp": time.Now().Add(env.GetLifeTime()).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(secretKey)
 }
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -189,11 +89,65 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func generateToken(id uint) (string, error) {
-	claims := jwt.MapClaims{
-		"id":  id,
-		"exp": time.Now().Add(env.GetLifeTime()).Unix(),
+func Login(stor contract.Stor) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var user entity.User
+		var err error
+
+		if err = user.Pars(c); err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		userid, err := user.FindUser(c, stor)
+		if err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		t, err := generateToken(userid)
+		if err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		if _, err = cachedPass.getPass(userid); err != nil {
+			go cachedPass.deletePass(userid)
+		}
+
+		cachedPass.setPass(userid, user.Password)
+		c.JSON(http.StatusOK, gin.H{"token": t})
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(secretKey)
+}
+
+func UpdateUser(stor contract.Stor) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userId := getUserID(c)
+		var user entity.User
+		var err error
+
+		if err = user.Pars(c); err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		oldPass, err := cachedPass.getPass(userId)
+		if err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		if oldPass != user.Password {
+			errorHandling(c, ErrNotMatchPassword)
+			return
+		}
+
+		if err = user.UpdateUser(c, stor); err != nil {
+			errorHandling(c, err)
+			return
+		}
+
+		cachedPass.setPass(userId, user.Password)
+		c.JSON(http.StatusBadRequest, user)
+	}
 }
