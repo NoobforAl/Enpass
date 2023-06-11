@@ -8,6 +8,7 @@ import (
 )
 
 var cachedPass savedPass
+var timeDelay = env.GetLifeTime()
 
 type dataPass struct {
 	id       uint
@@ -46,9 +47,6 @@ func (sp *savedPass) setPass(id uint, pass string) {
 }
 
 func (sp *savedPass) deletePass(id uint) {
-	timeDelay := env.GetLifeTime()
-	t := time.NewTicker(timeDelay)
-
 	for {
 		select {
 		case pass := <-sp.ch:
@@ -58,10 +56,9 @@ func (sp *savedPass) deletePass(id uint) {
 			}
 			sp.mux.Lock()
 			sp.passwords[pass.id] = pass.password
-			t.Reset(timeDelay)
 			sp.mux.Unlock()
 
-		case <-t.C:
+		case <-time.After(timeDelay):
 			sp.mux.Lock()
 			defer sp.mux.Unlock()
 			delete(sp.passwords, id)
