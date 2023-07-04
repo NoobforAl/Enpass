@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	env "github.com/NoobforAl/Enpass/loadEnv"
+	env "github.com/NoobforAl/Enpass/config_loader"
 )
 
 var cachedPass savedPass

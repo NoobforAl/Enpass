@@ -1,9 +1,9 @@
 package main
 
 import (
+	env "github.com/NoobforAl/Enpass/config_loader"
 	"github.com/NoobforAl/Enpass/controller"
 	"github.com/NoobforAl/Enpass/database"
-	env "github.com/NoobforAl/Enpass/loadEnv"
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,7 +37,7 @@ func main() {
 		api.DELETE("/deleteService/:id", controller.DeleteService(stor))
 	}
 
-	if err := r.Run("0.0.0.0:1111"); err != nil {
+	if err := r.Run("127.0.0.1:1111"); err != nil {
 		panic(err)
 	}
 }

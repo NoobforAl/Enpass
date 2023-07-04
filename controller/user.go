@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"time"
 
+	env "github.com/NoobforAl/Enpass/config_loader"
 	"github.com/NoobforAl/Enpass/contract"
 	"github.com/NoobforAl/Enpass/entity"
-	env "github.com/NoobforAl/Enpass/loadEnv"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
