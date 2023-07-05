@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 
+	errs "github.com/NoobforAl/Enpass/errors"
 	"gorm.io/gorm"
 )
 
@@ -51,7 +52,7 @@ func withContextModel[T model](ctx context.Context, m T) *gorm.DB {
 
 func transaction[T model](t string, ctx context.Context, values []T) error {
 	if len(values) == 0 {
-		return ErrTransaction
+		return errs.ErrTransaction
 	}
 
 	tx := withContextModel(ctx, values[0]).Begin()
@@ -82,7 +83,7 @@ func transaction[T model](t string, ctx context.Context, values []T) error {
 				return err
 			}
 		default:
-			return ErrNotFoundAction
+			return errs.ErrNotFoundAction
 		}
 	}
 
