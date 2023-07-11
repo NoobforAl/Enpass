@@ -13,8 +13,8 @@ type User interface {
 	) (entity.User, error)
 
 	UpdateUser(
-		context.Context,
-		entity.User,
-		entity.User,
-	) error
+		ctx context.Context,
+		old entity.User,
+		new entity.User,
+	) (entity.User, error)
 }
