@@ -6,6 +6,6 @@ LICENSE
 README.md
 .gitignore
 .air.toml
-/test
-/postman
+src/test
+/doc
 .env.example
