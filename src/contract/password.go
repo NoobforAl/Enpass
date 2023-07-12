@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/NoobforAl/Enpass/entity"
+	"github.com/NoobforAl/Enpass/schema"
 )
 
 type Password interface {
@@ -38,4 +39,14 @@ type Password interface {
 		context.Context,
 		entity.Password,
 	) (entity.Password, error)
+}
+
+type ValidatePassword interface {
+	ParsCreatePassword(
+		*schema.CreatePassword,
+	) error
+
+	ParsUpdatePassword(
+		*schema.UpdatePassword,
+	) error
 }
