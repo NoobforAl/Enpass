@@ -5,14 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type password interface {
-	*schema.CreatePassword |
-		*schema.UpdatePassword
-}
-
-func ParsPassword[T password](
+func (_ validator) ParsPassword(
 	c *gin.Context,
-	pass T,
+	pass schema.Password,
 ) error {
 	return c.BindJSON(pass)
 }

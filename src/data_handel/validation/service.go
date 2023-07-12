@@ -5,14 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type service interface {
-	*schema.CreateService |
-		*schema.UpdateService
-}
-
-func ParsService[T service](
+func (_ validator) ParsService(
 	c *gin.Context,
-	pass T,
+	pass schema.Service,
 ) error {
 	return c.BindJSON(pass)
 }

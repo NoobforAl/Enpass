@@ -5,14 +5,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type user interface {
-	*schema.UpdateUser |
-		*schema.GetUser
+func (_ validator) ParsUpdateUser(
+	ctx *gin.Context,
+	user *schema.UpdateUser,
+) error {
+	return ctx.BindJSON(user)
 }
 
-func ParsUser[T user](
-	c *gin.Context,
-	user T,
+func (_ validator) ParsLoginUser(
+	ctx *gin.Context,
+	user *schema.Login,
 ) error {
-	return c.BindJSON(user)
+	return ctx.BindJSON(user)
 }
