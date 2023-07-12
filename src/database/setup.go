@@ -58,10 +58,11 @@ func createUserIfNotExist() error {
 	}
 
 	if user.Password == "" {
-		user.Password = "1111111111111111"
+		defaultPassword := "1111111111111111"
+		user.Password = defaultPassword
 		user.Password = crypto.HashSha256(user.Password)
 		user.Password, err = crypto.Encrypt(
-			user.Password, user.Password)
+			defaultPassword, user.Password)
 
 		if err != nil {
 			return err
