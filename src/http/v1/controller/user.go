@@ -1,14 +1,18 @@
 package controller
 
 import (
-	crand "crypto/rand"
-	"errors"
-	"fmt"
 	"math/rand"
 	"net/http"
+
+	"errors"
+	"fmt"
 	"time"
 
+	crand "crypto/rand"
+
 	env "github.com/NoobforAl/Enpass/config_loader"
+	errs "github.com/NoobforAl/Enpass/errors"
+
 	"github.com/NoobforAl/Enpass/contract"
 	"github.com/NoobforAl/Enpass/entity"
 	"github.com/dgrijalva/jwt-go"
@@ -67,7 +71,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.Join(ErrUnexpectedSigning, fmt.Errorf("%v", token.Header["alg"]))
+				return nil, errors.Join(errs.ErrUnexpectedSigning, fmt.Errorf("%v", token.Header["alg"]))
 			}
 			return secretKey, nil
 		})
@@ -89,25 +93,25 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func Login(stor contract.Stor) gin.HandlerFunc {
+func Login(stor contract.Store) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user entity.User
 		var err error
 
 		if err = user.Pars(c); err != nil {
-			errorHandling(c, err)
+			errs.ErrHandle(c, err)
 			return
 		}
 
 		userid, err := user.FindUser(c, stor)
 		if err != nil {
-			errorHandling(c, err)
+			errs.ErrHandle(c, err)
 			return
 		}
 
 		t, err := generateToken(userid)
 		if err != nil {
-			errorHandling(c, err)
+			errs.ErrHandle(c, err)
 			return
 		}
 
@@ -120,30 +124,30 @@ func Login(stor contract.Stor) gin.HandlerFunc {
 	}
 }
 
-func UpdateUser(stor contract.Stor) gin.HandlerFunc {
+func UpdateUser(stor contract.Store) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userId := getUserID(c)
 		var user entity.User
 		var err error
 
 		if err = user.Pars(c); err != nil {
-			errorHandling(c, err)
+			errs.ErrHandle(c, err)
 			return
 		}
 
 		oldPass, err := cachedPass.getPass(userId)
 		if err != nil {
-			errorHandling(c, err)
+			errs.ErrHandle(c, err)
 			return
 		}
 
 		if oldPass != user.Password {
-			errorHandling(c, ErrNotMatchPassword)
+			errs.ErrHandle(c, ErrNotMatchPassword)
 			return
 		}
 
 		if err = user.UpdateUser(c, stor); err != nil {
-			errorHandling(c, err)
+			errs.ErrHandle(c, err)
 			return
 		}
 
