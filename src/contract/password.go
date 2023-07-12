@@ -3,7 +3,6 @@ package contract
 import (
 	"context"
 
-	"github.com/NoobforAl/Enpass/database"
 	"github.com/NoobforAl/Enpass/entity"
 	"github.com/NoobforAl/Enpass/schema"
 	"github.com/gin-gonic/gin"
@@ -46,15 +45,4 @@ type ValidatePassword interface {
 		*gin.Context,
 		*schema.Password,
 	) error
-}
-
-type ParserPassword interface {
-	SchemaToEntityPass(
-		pass schema.Password,
-		passID, userId uint,
-	) entity.Password
-
-	EntityToDbModelPass(
-		pass entity.Password,
-	) database.Password
 }
