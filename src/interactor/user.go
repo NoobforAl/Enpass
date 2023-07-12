@@ -4,35 +4,21 @@ import (
 	"context"
 
 	"github.com/NoobforAl/Enpass/entity"
-	"github.com/NoobforAl/Enpass/schema"
 )
 
 func (i interActor) FindUser(
 	ctx context.Context,
-	user schema.GetUser,
+	user entity.User,
 ) (entity.User, error) {
-	userPass := entity.User{
-		ID:       1,
-		Password: user.Password,
-	}
-
-	return i.store.GetUser(ctx, userPass)
+	return i.store.GetUser(ctx, user)
 }
 
 func (i interActor) UpdateUser(
 	ctx context.Context,
-	user schema.UpdateUser,
+	oldUser entity.User,
+	newUser entity.User,
 ) (entity.User, error) {
-
-	oldPass := entity.User{
-		Password: user.Old,
-	}
-
-	newPass := entity.User{
-		Password: user.New,
-	}
-
 	return i.store.UpdateUser(
-		ctx, oldPass, newPass,
+		ctx, oldUser, newUser,
 	)
 }

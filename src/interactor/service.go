@@ -4,17 +4,14 @@ import (
 	"context"
 
 	"github.com/NoobforAl/Enpass/entity"
-	"github.com/NoobforAl/Enpass/schema"
 )
 
 func (i interActor) FindService(
 	ctx context.Context,
-	id uint,
+	ser entity.Service,
 ) (entity.Service, error) {
 	return i.store.GetService(
-		ctx, entity.Service{
-			ServiceId: id,
-		})
+		ctx, ser)
 }
 
 func (i interActor) GetAllService(
@@ -25,32 +22,25 @@ func (i interActor) GetAllService(
 
 func (i interActor) CreateService(
 	ctx context.Context,
-	service schema.CreateService,
+	ser entity.Service,
 ) (entity.Service, error) {
 	return i.store.InsertService(
-		ctx, entity.Service{
-			Name: service.Name,
-		})
+		ctx, ser)
 }
 
 func (i interActor) UpdateService(
 	ctx context.Context,
-	upSer schema.UpdateService,
+	ser entity.Service,
 	id uint,
 ) (entity.Service, error) {
 	return i.store.UpdateService(
-		ctx, entity.Service{
-			ServiceId: id,
-			Name:      upSer.Name,
-		})
+		ctx, ser)
 }
 
 func (i interActor) DeleteService(
 	ctx context.Context,
-	id uint,
+	ser entity.Service,
 ) (entity.Service, error) {
 	return i.store.DeleteService(
-		ctx, entity.Service{
-			ServiceId: id,
-		})
+		ctx, ser)
 }
