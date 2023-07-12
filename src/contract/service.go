@@ -38,11 +38,7 @@ type Service interface {
 }
 
 type ValidateService interface {
-	ParsCreateService(
-		*schema.CreateService,
-	) error
-
-	ParsUpdateService(
-		*schema.UpdateService,
+	ParsService(
+		*schema.Service,
 	) error
 }

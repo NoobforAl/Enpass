@@ -24,4 +24,8 @@ type ValidateUser interface {
 	ParsUpdateUser(
 		*schema.UpdateUser,
 	) error
+
+	ParsLoginUser(
+		*schema.Login,
+	) error
 }

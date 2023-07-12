@@ -8,10 +8,6 @@ import (
 )
 
 type Password interface {
-	NewPassword(
-		entity.Password,
-	) (entity.Password, error)
-
 	GetPassword(
 		ctx context.Context,
 		pass entity.Password,
@@ -43,11 +39,7 @@ type Password interface {
 }
 
 type ValidatePassword interface {
-	ParsCreatePassword(
-		*schema.CreatePassword,
-	) error
-
-	ParsUpdatePassword(
-		*schema.UpdatePassword,
+	ParsPassword(
+		*schema.Password,
 	) error
 }
