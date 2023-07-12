@@ -5,6 +5,6 @@ type UpdateUser struct {
 	New string `form:"new" json:"new" binding:"required"`
 }
 
-type GetUser struct {
+type Login struct {
 	Password string `form:"password" json:"password" binding:"required"`
 }
