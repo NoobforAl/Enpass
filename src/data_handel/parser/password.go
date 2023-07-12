@@ -7,7 +7,7 @@ import (
 )
 
 // schema to entity password
-func (_ schemaToEntity) Password(
+func (_ parser) SchemaToEntityPass(
 	pass schema.Password,
 	passID, userId uint,
 ) entity.Password {
@@ -21,7 +21,7 @@ func (_ schemaToEntity) Password(
 	}
 }
 
-func (_ entityToDbModel) Password(
+func (_ parser) EntityToDbModelPass(
 	pass entity.Password,
 ) database.Password {
 	return database.Password{

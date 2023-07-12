@@ -7,7 +7,7 @@ import (
 )
 
 // schema to entity service
-func (_ schemaToEntity) Service(
+func (_ parser) SchemaToEntityService(
 	ser schema.Service,
 	id uint,
 ) entity.Service {
@@ -17,7 +17,7 @@ func (_ schemaToEntity) Service(
 	}
 }
 
-func (_ entityToDbModel) Service(
+func (_ parser) EntityToDbModelService(
 	ser entity.Service,
 ) database.Service {
 	return database.Service{

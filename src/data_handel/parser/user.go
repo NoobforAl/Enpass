@@ -6,7 +6,7 @@ import (
 	"github.com/NoobforAl/Enpass/schema"
 )
 
-func (_ schemaToEntity) Login(
+func (_ parser) SchemaToEntityLogin(
 	user schema.Login,
 	id uint,
 ) entity.User {
@@ -16,7 +16,7 @@ func (_ schemaToEntity) Login(
 	}
 }
 
-func (_ schemaToEntity) UpdateUser(
+func (_ parser) SchemaToEntityUser(
 	user schema.UpdateUser,
 	id uint,
 ) (old, new entity.User) {
@@ -30,7 +30,7 @@ func (_ schemaToEntity) UpdateUser(
 		}
 }
 
-func (_ entityToDbModel) User(
+func (_ parser) EntityToDbModelUser(
 	user entity.User,
 ) database.User {
 	return database.User{

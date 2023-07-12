@@ -7,7 +7,7 @@ import (
 )
 
 // userId
-func (_ httpPars) GetUserID(
+func (_ parser) GetUserID(
 	c *gin.Context,
 	key string,
 ) uint {
@@ -16,7 +16,7 @@ func (_ httpPars) GetUserID(
 	return uint(userID)
 }
 
-func (_ httpPars) GetQueryInt(
+func (_ parser) GetQueryInt(
 	c *gin.Context,
 	key string,
 ) (int, error) {
@@ -24,7 +24,7 @@ func (_ httpPars) GetQueryInt(
 	return strconv.Atoi(s)
 }
 
-func (_ httpPars) GetParmInt(
+func (_ parser) GetParmInt(
 	c *gin.Context,
 	key string,
 ) (int, error) {
