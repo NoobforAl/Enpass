@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/NoobforAl/Enpass/entity"
+	"github.com/NoobforAl/Enpass/schema"
 )
 
 type Service interface {
@@ -34,4 +35,14 @@ type Service interface {
 		context.Context,
 		entity.Service,
 	) (entity.Service, error)
+}
+
+type ValidateService interface {
+	ParsCreateService(
+		*schema.CreateService,
+	) error
+
+	ParsUpdateService(
+		*schema.UpdateService,
+	) error
 }
