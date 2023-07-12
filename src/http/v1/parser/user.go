@@ -1,12 +1,11 @@
 package parser
 
 import (
-	"github.com/NoobforAl/Enpass/database"
 	"github.com/NoobforAl/Enpass/entity"
 	"github.com/NoobforAl/Enpass/schema"
 )
 
-func (_ parser) SchemaToEntityLogin(
+func SchemaToEntityLogin(
 	user schema.Login,
 	id uint,
 ) entity.User {
@@ -16,7 +15,7 @@ func (_ parser) SchemaToEntityLogin(
 	}
 }
 
-func (_ parser) SchemaToEntityUser(
+func SchemaToEntityUser(
 	user schema.UpdateUser,
 	id uint,
 ) (old, new entity.User) {
@@ -28,13 +27,4 @@ func (_ parser) SchemaToEntityUser(
 			ID:       id,
 			Password: user.New,
 		}
-}
-
-func (_ parser) EntityToDbModelUser(
-	user entity.User,
-) database.User {
-	return database.User{
-		ID:     user.ID,
-		EnPass: user.Password,
-	}
 }
