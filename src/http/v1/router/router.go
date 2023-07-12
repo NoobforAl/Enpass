@@ -9,9 +9,10 @@ import (
 func Default(
 	r *gin.Engine,
 	s contract.Store,
+	v contract.Validation,
 ) {
 	r.POST("/login",
-		controller.Login(s))
+		controller.Login(s, v))
 	r.GET("/genRandomPass",
 		controller.GenRandomPass)
 }
@@ -19,33 +20,34 @@ func Default(
 func MainApi(
 	api *gin.RouterGroup,
 	s contract.Store,
+	v contract.Validation,
 ) {
 	api.Use(controller.AuthMiddleware())
 
 	api.GET("/allPass",
-		controller.AllPass(s))
+		controller.AllPass(s, v))
 	api.GET("/allService",
-		controller.AllService(s))
+		controller.AllService(s, v))
 
 	api.GET("/pass/:id",
-		controller.FindPass(s))
+		controller.FindPass(s, v))
 	api.GET("/service/:id",
-		controller.FindService(s))
+		controller.FindService(s, v))
 
 	api.POST("/createPass",
-		controller.NewPass(s))
+		controller.NewPass(s, v))
 	api.POST("/createService",
-		controller.NewService(s))
+		controller.NewService(s, v))
 
 	api.PUT("/updateUser",
-		controller.UpdateUser(s))
+		controller.UpdateUser(s, v))
 	api.PUT("/updatePass",
-		controller.UpdatePass(s))
+		controller.UpdatePass(s, v))
 	api.PUT("/updateService",
-		controller.UpdateService(s))
+		controller.UpdateService(s, v))
 
 	api.DELETE("/deletePass/:id",
-		controller.DeletePassWord(s))
+		controller.DeletePass(s, v))
 	api.DELETE("/deleteService/:id",
-		controller.DeleteService(s))
+		controller.DeleteService(s, v))
 }
