@@ -3,8 +3,10 @@ package contract
 import (
 	"context"
 
+	"github.com/NoobforAl/Enpass/database"
 	"github.com/NoobforAl/Enpass/entity"
 	"github.com/NoobforAl/Enpass/schema"
+	"github.com/gin-gonic/gin"
 )
 
 type Password interface {
@@ -28,8 +30,9 @@ type Password interface {
 	) (entity.Password, error)
 
 	UpdatePassword(
-		context.Context,
-		entity.Password,
+		ctx context.Context,
+		pass entity.Password,
+		key string,
 	) (entity.Password, error)
 
 	DeletePassword(
@@ -40,6 +43,18 @@ type Password interface {
 
 type ValidatePassword interface {
 	ParsPassword(
+		*gin.Context,
 		*schema.Password,
 	) error
+}
+
+type ParserPassword interface {
+	SchemaToEntityPass(
+		pass schema.Password,
+		passID, userId uint,
+	) entity.Password
+
+	EntityToDbModelPass(
+		pass entity.Password,
+	) database.Password
 }
