@@ -1,8 +1,5 @@
 package schema
 
-type service struct {
+type Service struct {
 	Name string `form:"name" json:"name" binding:"required"`
 }
-
-type CreateService struct{ service }
-type UpdateService struct{ service }
