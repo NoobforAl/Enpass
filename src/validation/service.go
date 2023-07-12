@@ -7,7 +7,7 @@ import (
 
 func (_ validator) ParsService(
 	c *gin.Context,
-	pass schema.Service,
+	pass *schema.Service,
 ) error {
 	return c.BindJSON(pass)
 }
