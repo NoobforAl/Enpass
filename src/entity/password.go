@@ -1,7 +1,7 @@
 package entity
 
 type Password struct {
-	PassID    uint   `json:"passid"`
+	ID        uint   `json:"passid"`
 	UserID    uint   `json:"userid"`
 	ServiceID uint   `json:"serviceid"`
 	UserName  string `json:"username"`
