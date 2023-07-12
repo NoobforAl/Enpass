@@ -2,8 +2,11 @@ package database
 
 import (
 	"context"
+	"errors"
 	"sync"
 
+	"github.com/NoobforAl/Enpass/crypto"
+	"github.com/NoobforAl/Enpass/entity"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -26,11 +29,11 @@ func New(dsn string) (Stor, error) {
 		}
 
 		if err = migrate(); err != nil {
-			return
+			panic(err)
 		}
 
 		if err = createUserIfNotExist(); err != nil {
-			return
+			panic(err)
 		}
 	})
 	return stor, err
@@ -45,20 +48,28 @@ func migrate() error {
 }
 
 func createUserIfNotExist() error {
-	var user User
-	users, err := getMany(context.TODO(), &user)
-	if err != nil {
+	var user entity.User
+	user, err := stor.GetUser(context.TODO(), user)
+
+	if !errors.Is(
+		err, gorm.ErrRecordNotFound,
+	) && err != nil {
 		return err
 	}
 
-	if len(users) == 0 {
-		user.EnPass = "1111111111111111"
-		user.EnPass = user.EnPass.HashSha256()
-		user.EnPass, err = user.EnPass.EncryptValue("1111111111111111")
+	if user.Password == "" {
+		user.Password = "1111111111111111"
+		user.Password = crypto.HashSha256(user.Password)
+		user.Password, err = crypto.Encrypt(
+			user.Password, user.Password)
+
 		if err != nil {
 			return err
 		}
-		if err = insert(context.TODO(), &user); err != nil {
+
+		u := entityToModelUser(user)
+		if err = stor.db.Model(&u).
+			Save(&u).Error; err != nil {
 			return err
 		}
 	}

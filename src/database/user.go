@@ -3,52 +3,96 @@ package database
 import (
 	"context"
 	"time"
+
+	"github.com/NoobforAl/Enpass/entity"
 )
 
 type User struct {
 	ID        uint `gorm:"primarykey"`
-	EnPass    Value
+	EnPass    string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
-func (s Stor) NewUser(id uint, pass string) *User {
-	return &User{ID: id, EnPass: Value(pass)}
-}
-
-func (s Stor) GetUser(ctx context.Context, id uint) (*User, error) {
-	ser := s.NewUser(id, "")
-	return ser, get(ctx, ser)
-}
-
-func (s Stor) GetManyUser(ctx context.Context) ([]*User, error) {
-	return getMany(ctx, s.NewUser(0, ""))
-}
-
-func (s Stor) InsertUser(ctx context.Context, value User) error {
-	return insert(ctx, &value)
-}
-
-func (s Stor) InsertManyUser(ctx context.Context, values []*User) error {
-	return insertMany(ctx, values)
-}
-
-func (s Stor) UpdateUser(ctx context.Context, m User) error {
-	err := get(ctx, s.NewUser(m.ID, ""))
-	if err != nil {
-		return err
+func entityToModelUser(
+	user entity.User,
+) User {
+	return User{
+		ID:     user.ID,
+		EnPass: user.Password,
 	}
-	return update(ctx, &m)
 }
 
-func (s Stor) UpdateManyUser(ctx context.Context, values []*User) error {
-	return updateMany(ctx, values)
+func modelToEntityUser(
+	user User,
+) entity.User {
+	return entity.User{
+		ID:       user.ID,
+		Password: user.EnPass,
+	}
 }
 
-func (s Stor) DeleteUser(ctx context.Context, id uint) error {
-	return delete(ctx, s.NewUser(id, ""))
+func (s Stor) GetUser(
+	ctx context.Context,
+	u entity.User,
+) (entity.User, error) {
+	user := entityToModelUser(u)
+
+	err := s.db.Model(&user).
+		WithContext(ctx).
+		Where("id = ?", user.ID).
+		First(&user).Error
+
+	return modelToEntityUser(user), err
 }
 
-func (s Stor) DeleteManyUser(ctx context.Context, values []*User) error {
-	return deleteMany(ctx, values)
+func (s Stor) UpdateUser(
+	ctx context.Context,
+	old entity.User,
+	new entity.User,
+) (entity.User, error) {
+	var Pass []*Password
+	err := s.db.Model(&Password{}).
+		Find(&Pass).Error
+
+	if err != nil {
+		return new, err
+	}
+
+	for i := range Pass {
+		if err = Pass[i].DecryptValues(
+			old.Password,
+		); err != nil {
+			return new, err
+		}
+
+		if err = Pass[i].EncryptValues(
+			new.Password,
+		); err != nil {
+			return new, err
+		}
+	}
+
+	tx := s.db.Begin()
+
+	if err = tx.Model(&User{}).
+		Save(&new).Error; err != nil {
+		tx.Rollback()
+		return new, err
+	}
+
+	for i := range Pass {
+		if err = tx.Model(&Password{}).
+			Save(Pass[i]).Error; err != nil {
+			tx.Rollback()
+			return new, err
+		}
+	}
+
+	if err = tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return new, err
+	}
+
+	return new, nil
 }

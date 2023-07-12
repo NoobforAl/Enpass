@@ -3,6 +3,8 @@ package database
 import (
 	"context"
 	"time"
+
+	"github.com/NoobforAl/Enpass/entity"
 )
 
 type Password struct {
@@ -20,54 +22,168 @@ type Password struct {
 	UpdatedAt time.Time
 }
 
-func (s Stor) NewPassword(id, serId, userId uint,
-	userName, password, note, hash string) *Password {
-	return &Password{
-		ID:        id,
-		ServiceID: serId,
-		UserID:    userId,
+func entityToModelPass(
+	pass entity.Password,
+	key string,
+	decrypt bool,
+) (Password, error) {
+	var err error
+
+	password := Password{
+		ID:        pass.ID,
+		UserID:    pass.UserID,
+		ServiceID: pass.ServiceID,
 		Values: Values{
-			UserName: Value(userName),
-			Password: Value(password),
-			Note:     Value(note),
-			Hash:     Value(hash),
+			UserName: pass.UserName,
+			Password: pass.Password,
+			Note:     pass.Note,
 		},
 	}
-}
 
-func (s Stor) GetPassword(ctx context.Context, id uint) (*Password, error) {
-	ser := s.NewPassword(id, 0, 0, "", "", "", "")
-	return ser, get(ctx, ser)
-}
-
-func (s Stor) GetManyPassword(ctx context.Context) ([]*Password, error) {
-	return getMany(ctx, s.NewPassword(0, 0, 0, "", "", "", ""))
-}
-
-func (s Stor) InsertPassword(ctx context.Context, value Password) error {
-	return insert(ctx, &value)
-}
-
-func (s Stor) InsertManyPassword(ctx context.Context, values []*Password) error {
-	return insertMany(ctx, values)
-}
-
-func (s Stor) UpdatePassword(ctx context.Context, m Password) error {
-	err := get(ctx, s.NewPassword(m.ID, m.ServiceID, m.UserID, "", "", "", ""))
-	if err != nil {
-		return err
+	if decrypt {
+		err = password.EncryptValues(key)
 	}
-	return update(ctx, &m)
+
+	return password, err
 }
 
-func (s Stor) UpdateManyPassword(ctx context.Context, values []*Password) error {
-	return updateMany(ctx, values)
+func modelToEntityPass(
+	pass Password,
+	key string,
+	decrypt bool,
+) (entity.Password, error) {
+	var err error
+	if decrypt {
+		err = pass.DecryptValues(key)
+	}
+
+	return entity.Password{
+		ID:        pass.ID,
+		UserID:    pass.UserID,
+		ServiceID: pass.ServiceID,
+		UserName:  pass.UserName,
+		Password:  pass.Password,
+		Note:      pass.Note,
+	}, err
 }
 
-func (s Stor) DeletePassword(ctx context.Context, id uint) error {
-	return delete(ctx, s.NewPassword(id, 0, 0, "", "", "", ""))
+func (s Stor) GetPassword(
+	ctx context.Context,
+	pass entity.Password,
+	key string,
+	decrypt bool,
+) (entity.Password, error) {
+	password, err := entityToModelPass(
+		pass, "", false)
+
+	if err != nil {
+		return pass, err
+	}
+
+	err = s.db.Model(&password).
+		WithContext(ctx).
+		Where("id = ?", password.ID).
+		First(&password).Error
+
+	if err != nil {
+		return pass, err
+	}
+
+	return modelToEntityPass(
+		password, key, decrypt)
 }
 
-func (s Stor) DeleteManyPassword(ctx context.Context, values []*Password) error {
-	return deleteMany(ctx, values)
+func (s Stor) GetManyPassword(
+	ctx context.Context,
+	key string,
+	decrypt bool,
+) ([]entity.Password, error) {
+	var data []*Password
+	var err error
+
+	if err = s.db.Model(&Password{}).
+		WithContext(ctx).
+		First(&data).Error; err != nil {
+		return nil, err
+	}
+
+	passwords := make([]entity.Password, len(data))
+	for i := range passwords {
+		passwords[i], err = modelToEntityPass(
+			*data[i], key, decrypt)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return passwords, nil
+}
+
+func (s Stor) InsertPassword(
+	ctx context.Context,
+	pass entity.Password,
+	key string,
+) (entity.Password, error) {
+	password, err := entityToModelPass(
+		pass, key, true)
+
+	if err != nil {
+		return pass, err
+	}
+
+	err = s.db.Model(&password).
+		WithContext(ctx).
+		Save(&password).Error
+
+	if err != nil {
+		return pass, err
+	}
+
+	return modelToEntityPass(password, key, true)
+}
+
+func (s Stor) UpdatePassword(
+	ctx context.Context,
+	pass entity.Password,
+	key string,
+) (entity.Password, error) {
+	password, err := entityToModelPass(
+		pass, key, true)
+
+	if err != nil {
+		return pass, err
+	}
+
+	err = s.db.Model(&password).
+		WithContext(ctx).
+		Save(&password).Error
+
+	if err != nil {
+		return pass, err
+	}
+
+	return modelToEntityPass(password, key, true)
+}
+
+func (s Stor) DeletePassword(
+	ctx context.Context,
+	pass entity.Password,
+) (entity.Password, error) {
+	password, err := entityToModelPass(
+		pass, "", false)
+
+	if err != nil {
+		return pass, err
+	}
+
+	err = s.db.Model(password).
+		Where("id = ?", password.ID).
+		Delete(&password).Error
+
+	if err != nil {
+		return pass, err
+	}
+
+	return modelToEntityPass(password, "", false)
 }

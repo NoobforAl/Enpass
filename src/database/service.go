@@ -3,52 +3,106 @@ package database
 import (
 	"context"
 	"time"
+
+	"github.com/NoobforAl/Enpass/entity"
 )
 
 type Service struct {
-	ID        uint  `gorm:"primarykey;uniq"`
-	Name      Value `gorm:"unique"`
+	ID        uint   `gorm:"primarykey;uniq"`
+	Name      string `gorm:"unique"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
-func (s Stor) NewService(id uint, name string) *Service {
-	return &Service{ID: id, Name: Value(name)}
-}
-
-func (s Stor) GetService(ctx context.Context, id uint) (*Service, error) {
-	ser := s.NewService(id, "")
-	return ser, get(ctx, ser)
-}
-
-func (s Stor) GetManyService(ctx context.Context) ([]*Service, error) {
-	return getMany(ctx, s.NewService(0, ""))
-}
-
-func (s Stor) InsertService(ctx context.Context, value Service) error {
-	return insert(ctx, &value)
-}
-
-func (s Stor) InsertManyService(ctx context.Context, values []*Service) error {
-	return insertMany(ctx, values)
-}
-
-func (s Stor) UpdateService(ctx context.Context, m Service) error {
-	err := get(ctx, s.NewService(m.ID, ""))
-	if err != nil {
-		return err
+func entityToModelService(
+	ser entity.Service,
+) Service {
+	return Service{
+		ID:   ser.ID,
+		Name: ser.Name,
 	}
-	return update(ctx, &m)
 }
 
-func (s Stor) UpdateManyService(ctx context.Context, values []*Service) error {
-	return updateMany(ctx, values)
+func modelToEntityService(
+	ser Service,
+) entity.Service {
+	return entity.Service{
+		ID:   ser.ID,
+		Name: ser.Name,
+	}
 }
 
-func (s Stor) DeleteService(ctx context.Context, id uint) error {
-	return delete(ctx, s.NewService(id, ""))
+func (s Stor) GetService(
+	ctx context.Context,
+	ser entity.Service,
+) (entity.Service, error) {
+	service := entityToModelService(ser)
+
+	err := s.db.Model(&service).
+		WithContext(ctx).
+		Where("id = ?", service.ID).
+		First(&service).Error
+
+	return modelToEntityService(service), err
 }
 
-func (s Stor) DeleteManyService(ctx context.Context, values []*Service) error {
-	return deleteMany(ctx, values)
+func (s Stor) GetManyService(
+	ctx context.Context,
+) ([]entity.Service, error) {
+	var data []*Service
+
+	err := s.db.Model(&Service{}).
+		WithContext(ctx).
+		Find(&data).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	services := make([]entity.Service, len(data))
+	for i := range services {
+		services[i] = modelToEntityService(*data[i])
+	}
+	return services, nil
+}
+
+func (s Stor) InsertService(
+	ctx context.Context,
+	ser entity.Service,
+) (entity.Service, error) {
+	service := entityToModelService(ser)
+
+	err := s.db.Model(&service).
+		WithContext(ctx).
+		Save(&service).Error
+
+	return modelToEntityService(service), err
+}
+
+func (s Stor) UpdateService(
+	ctx context.Context,
+	ser entity.Service,
+) (entity.Service, error) {
+	service := entityToModelService(ser)
+
+	err := s.db.Model(&service).
+		WithContext(ctx).
+		Where("id = ?", service.ID).
+		Save(&service).Error
+
+	return modelToEntityService(service), err
+}
+
+func (s Stor) DeleteService(
+	ctx context.Context,
+	ser entity.Service,
+) (entity.Service, error) {
+	service := entityToModelService(ser)
+
+	err := s.db.Model(&service).
+		WithContext(ctx).
+		Where("id = ?", service.ID).
+		Delete(&service).Error
+
+	return modelToEntityService(service), err
 }
