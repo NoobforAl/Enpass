@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/NoobforAl/Enpass/contract"
-	"github.com/NoobforAl/Enpass/controller"
+	"github.com/NoobforAl/Enpass/http/v1/controller"
 	"github.com/gin-gonic/gin"
 )
 
