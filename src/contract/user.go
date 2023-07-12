@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/NoobforAl/Enpass/entity"
+	"github.com/NoobforAl/Enpass/schema"
 )
 
 type User interface {
@@ -17,4 +18,10 @@ type User interface {
 		old entity.User,
 		new entity.User,
 	) (entity.User, error)
+}
+
+type ValidateUser interface {
+	ParsUpdateUser(
+		*schema.UpdateUser,
+	) error
 }
