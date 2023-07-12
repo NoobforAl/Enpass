@@ -28,10 +28,10 @@ type Service interface {
 	UpdateService(
 		context.Context,
 		entity.Service,
-	) error
+	) (entity.Service, error)
 
 	DeleteService(
 		context.Context,
 		entity.Service,
-	) error
+	) (entity.Service, error)
 }
