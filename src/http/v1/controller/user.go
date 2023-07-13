@@ -1,157 +1,79 @@
 package controller
 
 import (
-	"math/rand"
 	"net/http"
 
-	"errors"
-	"fmt"
-	"time"
-
-	crand "crypto/rand"
-
-	env "github.com/NoobforAl/Enpass/config_loader"
 	errs "github.com/NoobforAl/Enpass/errors"
+	"github.com/NoobforAl/Enpass/http/v1/parser"
+	"github.com/NoobforAl/Enpass/interactor"
+	"github.com/NoobforAl/Enpass/schema"
 
 	"github.com/NoobforAl/Enpass/contract"
-	"github.com/NoobforAl/Enpass/entity"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
-var secretKey = make([]byte, 32)
+const userIdDB = 1
 
-func init() {
-	_, err := crand.Read(secretKey)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func GenRandomPass(c *gin.Context) {
-	const (
-		sizeAllChar = 88
-		charSet     = "abcdefghijklmnopqrstuvwxyz" +
-			"ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-			"0123456789!@#$%^&*()-_=+,.?/:;{}[]|~"
-	)
-
-	size, _ := getQueryInt(c, "size")
-	if size <= 0 || size > 1000 {
-		size = 10
-	}
-
-	passWord := make([]byte, size)
-	for i := 0; i < size; i++ {
-		passWord[i] = charSet[rand.Intn(sizeAllChar)]
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"password": string(passWord),
-	})
-}
-
-func generateToken(id uint) (string, error) {
-	claims := jwt.MapClaims{
-		"id":  id,
-		"exp": time.Now().Add(env.GetLifeTime()).Unix(),
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(secretKey)
-}
-
-func AuthMiddleware() gin.HandlerFunc {
+func Login(
+	stor contract.Store,
+	validator contract.Validation,
+) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := c.GetHeader("Authorization")
-
-		if tokenString == "" {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
-
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.Join(errs.ErrUnexpectedSigning, fmt.Errorf("%v", token.Header["alg"]))
-			}
-			return secretKey, nil
-		})
-
-		if err != nil {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
-
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok || !token.Valid {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
-
-		id := fmt.Sprintf("%v", claims["id"])
-		c.Set("userId", id)
-		c.Next()
-	}
-}
-
-func Login(stor contract.Store) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var user entity.User
+		var login schema.Login
 		var err error
 
-		if err = user.Pars(c); err != nil {
+		if err = validator.
+			ParsLoginUser(c, &login); err != nil {
 			errs.ErrHandle(c, err)
 			return
 		}
 
-		userid, err := user.FindUser(c, stor)
+		user := parser.SchemaToEntityLogin(login, userIdDB)
+
+		if _, err = interactor.New(stor).
+			FindUser(c, user); err != nil {
+			errs.ErrHandle(c, err)
+			return
+		}
+
+		t, err := generateToken(userIdDB)
 		if err != nil {
 			errs.ErrHandle(c, err)
 			return
 		}
 
-		t, err := generateToken(userid)
-		if err != nil {
-			errs.ErrHandle(c, err)
-			return
-		}
-
-		if _, err = cachedPass.getPass(userid); err != nil {
-			go cachedPass.deletePass(userid)
-		}
-
-		cachedPass.setPass(userid, user.Password)
 		c.JSON(http.StatusOK, gin.H{"token": t})
 	}
 }
 
-func UpdateUser(stor contract.Store) gin.HandlerFunc {
+func UpdateUser(
+	stor contract.Store,
+	validator contract.Validation,
+) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userId := getUserID(c)
-		var user entity.User
+		userId := parser.GetUserID(c, userId)
+		var updatePass schema.UpdateUser
 		var err error
 
-		if err = user.Pars(c); err != nil {
+		if err = validator.
+			ParsUpdateUser(
+				c, &updatePass,
+			); err != nil {
 			errs.ErrHandle(c, err)
 			return
 		}
 
-		oldPass, err := cachedPass.getPass(userId)
+		old, new := parser.
+			SchemaToEntityUser(updatePass, userId)
+
+		user, err := interactor.New(stor).
+			UpdateUser(c, old, new)
+
 		if err != nil {
 			errs.ErrHandle(c, err)
 			return
 		}
 
-		if oldPass != user.Password {
-			errs.ErrHandle(c, ErrNotMatchPassword)
-			return
-		}
-
-		if err = user.UpdateUser(c, stor); err != nil {
-			errs.ErrHandle(c, err)
-			return
-		}
-
-		cachedPass.setPass(userId, user.Password)
-		c.JSON(http.StatusBadRequest, user)
+		c.JSON(http.StatusOK, user)
 	}
 }
