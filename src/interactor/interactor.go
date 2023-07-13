@@ -8,7 +8,7 @@ type interActor struct {
 	store contract.Store
 }
 
-func NewActorUser(
+func New(
 	store contract.Store,
 ) interActor {
 	return interActor{
