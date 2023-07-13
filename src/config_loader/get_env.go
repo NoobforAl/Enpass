@@ -10,6 +10,7 @@ import (
 )
 
 var dsn string
+var secretKey []byte
 var tokenLifeTime time.Duration
 
 func init() {
@@ -19,6 +20,9 @@ func init() {
 
 	// get dsn sqlite
 	dsn = os.Getenv("DSN")
+
+	// get dsn sqlite
+	secretKey = []byte(os.Getenv("SECRETKEY"))
 
 	// setup life time
 	delay := os.Getenv("LIFETIME")
@@ -31,6 +35,10 @@ func init() {
 
 func GetDSN() string {
 	return dsn
+}
+
+func GetSecretKey() []byte {
+	return secretKey
 }
 
 func GetLifeTime() time.Duration {

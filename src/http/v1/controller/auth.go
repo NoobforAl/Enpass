@@ -1,7 +1,7 @@
 package controller
 
 import (
-	crand "crypto/rand"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"net/http"
@@ -18,7 +18,12 @@ var secretKey = make([]byte, 32)
 const userId = "userId"
 
 func init() {
-	_, err := crand.Read(secretKey)
+	if tmp := env.GetSecretKey(); len(tmp) > 4 {
+		secretKey = tmp
+		return
+	}
+
+	_, err := rand.Read(secretKey)
 	if err != nil {
 		panic(err)
 	}
