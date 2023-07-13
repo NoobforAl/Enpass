@@ -25,7 +25,8 @@ func ErrHandle(c *gin.Context, err error) {
 
 	case errors.Is(err, ErrDecrypt) ||
 		errors.Is(err, ErrEncrypt) ||
-		errors.Is(err, ErrTextIsShort):
+		errors.Is(err, ErrTextIsShort) ||
+		errors.Is(err, ErrNotMatchPassword):
 		status = http.StatusUnauthorized
 	}
 
