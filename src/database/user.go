@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/NoobforAl/Enpass/crypto"
 	"github.com/NoobforAl/Enpass/entity"
 )
 
@@ -73,10 +74,23 @@ func (s Stor) UpdateUser(
 		}
 	}
 
-	tx := s.db.Begin()
+	tx := s.db.WithContext(ctx).Begin()
+
+	newUser := entityToModelUser(new)
+
+	newUser.EnPass = crypto.HashSha256(newUser.EnPass)
+	newUser.EnPass, err = crypto.Encrypt(
+		new.Password,
+		newUser.EnPass)
+
+	if err != nil {
+		tx.Rollback()
+		return new, err
+	}
 
 	if err = tx.Model(&User{}).
-		Save(&new).Error; err != nil {
+		Where("id = ?", new.ID).
+		Save(newUser).Error; err != nil {
 		tx.Rollback()
 		return new, err
 	}
@@ -93,6 +107,5 @@ func (s Stor) UpdateUser(
 		tx.Rollback()
 		return new, err
 	}
-
 	return new, nil
 }
