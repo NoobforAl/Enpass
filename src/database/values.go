@@ -89,7 +89,7 @@ func (v *Values) DecryptValues(
 	v.Password = Password
 	v.Note = Note
 
-	if crypto.IsOkHash(
+	if !crypto.IsOkHash(
 		UserName+Password+Note,
 		v.Hash,
 	) {
