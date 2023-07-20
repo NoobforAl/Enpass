@@ -31,7 +31,6 @@ func (i interActor) CreateService(
 func (i interActor) UpdateService(
 	ctx context.Context,
 	ser entity.Service,
-	id uint,
 ) (entity.Service, error) {
 	return i.store.UpdateService(
 		ctx, ser)
