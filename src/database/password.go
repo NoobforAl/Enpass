@@ -103,7 +103,7 @@ func (s Stor) GetManyPassword(
 
 	if err = s.db.Model(&Password{}).
 		WithContext(ctx).
-		First(&data).Error; err != nil {
+		Find(&data).Error; err != nil {
 		return nil, err
 	}
 
