@@ -134,7 +134,7 @@ func (s Stor) InsertPassword(
 
 	err = s.db.Model(&password).
 		WithContext(ctx).
-		Save(&password).Error
+		Create(&password).Error
 
 	if err != nil {
 		return pass, err
