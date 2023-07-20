@@ -39,11 +39,11 @@ func MainApi(
 	api.POST("/createService",
 		controller.NewService(s, v))
 
-	api.PUT("/updateUser",
+	api.PUT("/updateUser/:id",
 		controller.UpdateUser(s, v))
-	api.PUT("/updatePass",
+	api.PUT("/updatePass/:id",
 		controller.UpdatePass(s, v))
-	api.PUT("/updateService",
+	api.PUT("/updateService/:id",
 		controller.UpdateService(s, v))
 
 	api.DELETE("/deletePass/:id",
