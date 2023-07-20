@@ -2,6 +2,7 @@ package parser
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +15,15 @@ func GetUserID(
 	str := c.GetString(key)
 	userID, _ := strconv.Atoi(str)
 	return uint(userID)
+}
+
+func GetQueryBool(
+	c *gin.Context,
+	key string,
+) bool {
+	s := c.Query(key)
+	return strings.
+		EqualFold(s, "true")
 }
 
 func GetQueryInt(
