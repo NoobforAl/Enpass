@@ -102,6 +102,7 @@ func (s Stor) DeleteService(
 	err := s.db.Model(&service).
 		WithContext(ctx).
 		Where("id = ?", service.ID).
+		First(&service).
 		Delete(&service).Error
 
 	return modelToEntityService(service), err
