@@ -3,43 +3,68 @@ package interactor
 import (
 	"context"
 
+	"github.com/NoobforAl/Enpass/caching"
 	"github.com/NoobforAl/Enpass/entity"
 )
 
-func (i interActor) FindPassword(
+func (i interActor) CreatePass(
 	ctx context.Context,
 	pass entity.Password,
-	key string,
-	decrypt bool,
+	userID uint,
 ) (entity.Password, error) {
-	return i.store.GetPassword(
-		ctx, pass, key, decrypt)
+	key, err := caching.CachedPass.
+		GetPass(userID)
+	if err != nil {
+		return pass, err
+	}
+
+	return i.store.InsertPassword(
+		ctx, pass, key)
 }
 
 func (i interActor) GetAllPassword(
 	ctx context.Context,
-	key string,
+	userID uint,
 	decrypt bool,
 ) ([]entity.Password, error) {
+	key, err := caching.CachedPass.
+		GetPass(userID)
+	if err != nil {
+		return nil, err
+	}
+
 	return i.store.GetManyPassword(
 		ctx, key, decrypt)
+}
+
+func (i interActor) FindPassword(
+	ctx context.Context,
+	pass entity.Password,
+	userID uint,
+	decrypt bool,
+) (entity.Password, error) {
+	key, err := caching.CachedPass.
+		GetPass(userID)
+	if err != nil {
+		return pass, err
+	}
+
+	return i.store.GetPassword(
+		ctx, pass, key, decrypt)
 }
 
 func (i interActor) UpdatePass(
 	ctx context.Context,
 	pass entity.Password,
-	key string,
+	userID uint,
 ) (entity.Password, error) {
-	return i.store.UpdatePassword(
-		ctx, pass, key)
-}
+	key, err := caching.CachedPass.
+		GetPass(userID)
+	if err != nil {
+		return pass, err
+	}
 
-func (i interActor) CreatePass(
-	ctx context.Context,
-	pass entity.Password,
-	key string,
-) (entity.Password, error) {
-	return i.store.InsertPassword(
+	return i.store.UpdatePassword(
 		ctx, pass, key)
 }
 
