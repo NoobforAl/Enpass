@@ -179,6 +179,7 @@ func (s Stor) DeletePassword(
 
 	err = s.db.Model(password).
 		Where("id = ?", password.ID).
+		First(&password).
 		Delete(&password).Error
 
 	if err != nil {
