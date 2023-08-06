@@ -22,7 +22,7 @@ func init() {
 	dsn = os.Getenv("DSN")
 
 	// get dsn sqlite
-	secretKey = []byte(os.Getenv("SECRETKEY"))
+	secretKey = []byte(os.Getenv("SECRET_KEY"))
 
 	// setup life time
 	delay := os.Getenv("LIFETIME")
