@@ -12,14 +12,16 @@ func (i interActor) CreatePass(
 	pass entity.Password,
 	userID uint,
 ) (entity.Password, error) {
-	key, err := caching.CachedPass.
-		GetPass(userID)
-	if err != nil {
+	var key string
+	var err error
+
+	if key, err = caching.
+		CachedPass.
+		GetPass(userID); err != nil {
 		return pass, err
 	}
 
-	return i.store.InsertPassword(
-		ctx, pass, key)
+	return i.store.InsertPassword(ctx, pass, key)
 }
 
 func (i interActor) GetAllPassword(
@@ -27,9 +29,12 @@ func (i interActor) GetAllPassword(
 	userID uint,
 	decrypt bool,
 ) ([]entity.Password, error) {
-	key, err := caching.CachedPass.
-		GetPass(userID)
-	if err != nil {
+	var key string
+	var err error
+
+	if key, err = caching.
+		CachedPass.
+		GetPass(userID); err != nil {
 		return nil, err
 	}
 
@@ -43,9 +48,12 @@ func (i interActor) FindPassword(
 	userID uint,
 	decrypt bool,
 ) (entity.Password, error) {
-	key, err := caching.CachedPass.
-		GetPass(userID)
-	if err != nil {
+	var key string
+	var err error
+
+	if key, err = caching.
+		CachedPass.
+		GetPass(userID); err != nil {
 		return pass, err
 	}
 
@@ -58,20 +66,21 @@ func (i interActor) UpdatePass(
 	pass entity.Password,
 	userID uint,
 ) (entity.Password, error) {
-	key, err := caching.CachedPass.
-		GetPass(userID)
-	if err != nil {
+	var key string
+	var err error
+
+	if key, err = caching.
+		CachedPass.
+		GetPass(userID); err != nil {
 		return pass, err
 	}
 
-	return i.store.UpdatePassword(
-		ctx, pass, key)
+	return i.store.UpdatePassword(ctx, pass, key)
 }
 
 func (i interActor) DeletePass(
 	ctx context.Context,
 	pass entity.Password,
 ) (entity.Password, error) {
-	return i.store.DeletePassword(
-		ctx, pass)
+	return i.store.DeletePassword(ctx, pass)
 }

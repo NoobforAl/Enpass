@@ -10,8 +10,7 @@ func (i interActor) FindService(
 	ctx context.Context,
 	ser entity.Service,
 ) (entity.Service, error) {
-	return i.store.GetService(
-		ctx, ser)
+	return i.store.GetService(ctx, ser)
 }
 
 func (i interActor) GetAllService(
@@ -24,22 +23,19 @@ func (i interActor) CreateService(
 	ctx context.Context,
 	ser entity.Service,
 ) (entity.Service, error) {
-	return i.store.InsertService(
-		ctx, ser)
+	return i.store.InsertService(ctx, ser)
 }
 
 func (i interActor) UpdateService(
 	ctx context.Context,
 	ser entity.Service,
 ) (entity.Service, error) {
-	return i.store.UpdateService(
-		ctx, ser)
+	return i.store.UpdateService(ctx, ser)
 }
 
 func (i interActor) DeleteService(
 	ctx context.Context,
 	ser entity.Service,
 ) (entity.Service, error) {
-	return i.store.DeleteService(
-		ctx, ser)
+	return i.store.DeleteService(ctx, ser)
 }
