@@ -1,7 +1,11 @@
 package validation
 
-type validator struct{}
+import "github.com/NoobforAl/Enpass/contract"
 
-func New() validator {
-	return validator{}
+type validator struct {
+	log contract.Logger
+}
+
+func New(log contract.Logger) validator {
+	return validator{log: log}
 }

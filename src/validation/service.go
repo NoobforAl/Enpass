@@ -5,9 +5,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (_ validator) ParsService(
+func (v validator) ParsService(
 	c *gin.Context,
 	pass *schema.Service,
 ) error {
+	v.log.Debug("Pars Service")
 	return c.BindJSON(pass)
 }

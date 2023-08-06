@@ -5,16 +5,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (_ validator) ParsUpdateUser(
+func (v validator) ParsUpdateUser(
 	ctx *gin.Context,
 	user *schema.UpdateUser,
 ) error {
+	v.log.Debug("Pars Update User")
 	return ctx.BindJSON(user)
 }
 
-func (_ validator) ParsLoginUser(
+func (v validator) ParsLoginUser(
 	ctx *gin.Context,
 	user *schema.Login,
 ) error {
+	v.log.Debug("Pars Login User")
 	return ctx.BindJSON(user)
 }

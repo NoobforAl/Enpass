@@ -5,9 +5,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (_ validator) ParsPassword(
+func (v validator) ParsPassword(
 	c *gin.Context,
 	pass *schema.Password,
 ) error {
+	v.log.Debug("Pars Password")
 	return c.BindJSON(pass)
 }
