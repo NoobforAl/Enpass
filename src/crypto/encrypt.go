@@ -13,9 +13,7 @@ import (
 
 const nonceSize = 12
 
-func Encrypt(
-	key, text string,
-) (string, error) {
+func Encrypt(key, text string) (string, error) {
 	block, err := aes.NewCipher([]byte(key))
 	if err != nil {
 		return "",

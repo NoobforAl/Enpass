@@ -9,9 +9,7 @@ import (
 	errs "github.com/NoobforAl/Enpass/errors"
 )
 
-func Decrypt(
-	key, text string,
-) (string, error) {
+func Decrypt(key, text string) (string, error) {
 	textDecoded, err := base64.
 		StdEncoding.
 		DecodeString(text)
