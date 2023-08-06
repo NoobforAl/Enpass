@@ -5,6 +5,7 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/NoobforAl/Enpass/contract"
 	"github.com/NoobforAl/Enpass/crypto"
 	"github.com/NoobforAl/Enpass/entity"
 	"gorm.io/driver/sqlite"
@@ -13,28 +14,35 @@ import (
 )
 
 type Stor struct {
-	db *gorm.DB
+	db  *gorm.DB
+	log contract.Logger
 }
 
 var stor Stor
 var onc sync.Once
 
-func New(dsn string) (Stor, error) {
+func New(dsn string, log contract.Logger) (Stor, error) {
 	var err error
 	onc.Do(func() {
+		stor.log = log
+
+		log.Debugf("setUp new database with this DSN: %s", dsn)
 		if stor.db, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
 		}); err != nil {
-			panic(err)
+			log.Panic(err)
 		}
 
+		log.Debug("Migrate Database")
 		if err = migrate(); err != nil {
-			panic(err)
+			log.Panic(err)
 		}
 
+		log.Info("Create New User If not Exist!")
 		if err = createUserIfNotExist(); err != nil {
-			panic(err)
+			log.Panic(err)
 		}
+
 	})
 	return stor, err
 }
@@ -48,8 +56,13 @@ func migrate() error {
 }
 
 func createUserIfNotExist() error {
+	stor.log.Debug("Get All Users")
+
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
 	var user entity.User
-	user, err := stor.GetUser(context.TODO(), user)
+	user, err := stor.GetUser(ctx, user)
 
 	if !errors.Is(
 		err, gorm.ErrRecordNotFound,
@@ -58,6 +71,7 @@ func createUserIfNotExist() error {
 	}
 
 	if user.Password == "" {
+		stor.log.Warn("User Not Found Create New User")
 		defaultPassword := "1111111111111111"
 		user.Password = defaultPassword
 		user.Password = crypto.HashSha256(user.Password)
@@ -68,8 +82,10 @@ func createUserIfNotExist() error {
 			return err
 		}
 
-		u := entityToModelUser(user)
-		if err = stor.db.Model(&u).
+		u := stor.entityToModelUser(user)
+		if err = stor.db.
+			WithContext(ctx).
+			Model(&u).
 			Save(&u).Error; err != nil {
 			return err
 		}
