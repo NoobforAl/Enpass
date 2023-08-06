@@ -12,9 +12,7 @@ type Values struct {
 	Hash     string
 }
 
-func (v *Values) EncryptValues(
-	key string,
-) error {
+func (v *Values) EncryptValues(key string) error {
 	var (
 		UserName string
 		Password string
@@ -54,9 +52,7 @@ func (v *Values) EncryptValues(
 	return nil
 }
 
-func (v *Values) DecryptValues(
-	key string,
-) error {
+func (v *Values) DecryptValues(key string) error {
 	var (
 		UserName string
 		Password string
