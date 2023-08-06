@@ -22,11 +22,13 @@ type Password struct {
 	UpdatedAt time.Time
 }
 
-func entityToModelPass(
+func (s Stor) entityToModelPass(
 	pass entity.Password,
 	key string,
 	decrypt bool,
 ) (Password, error) {
+	s.log.Debug("Convert Entity To Model Pass")
+
 	var err error
 
 	password := Password{
@@ -47,11 +49,12 @@ func entityToModelPass(
 	return password, err
 }
 
-func modelToEntityPass(
+func (s Stor) modelToEntityPass(
 	pass Password,
 	key string,
 	decrypt bool,
 ) (entity.Password, error) {
+	s.log.Debug("Convert Model To Entity Pass")
 	var err error
 	if decrypt {
 		err = pass.DecryptValues(key)
@@ -73,24 +76,17 @@ func (s Stor) GetPassword(
 	key string,
 	decrypt bool,
 ) (entity.Password, error) {
-	password, err := entityToModelPass(
-		pass, "", false)
+	s.log.Debugf("Get Password, with decrypt? %b", decrypt)
+	password, _ := s.entityToModelPass(pass, "", false)
 
-	if err != nil {
-		return pass, err
-	}
-
-	err = s.db.Model(&password).
+	if err := s.db.Model(&password).
 		WithContext(ctx).
 		Where("id = ?", password.ID).
-		First(&password).Error
-
-	if err != nil {
+		First(&password).Error; err != nil {
 		return pass, err
 	}
 
-	return modelToEntityPass(
-		password, key, decrypt)
+	return s.modelToEntityPass(password, key, decrypt)
 }
 
 func (s Stor) GetManyPassword(
@@ -98,6 +94,7 @@ func (s Stor) GetManyPassword(
 	key string,
 	decrypt bool,
 ) ([]entity.Password, error) {
+	s.log.Debugf("Get Many Password, with decrypt? %b", decrypt)
 	var data []*Password
 	var err error
 
@@ -109,7 +106,7 @@ func (s Stor) GetManyPassword(
 
 	passwords := make([]entity.Password, len(data))
 	for i := range passwords {
-		passwords[i], err = modelToEntityPass(
+		passwords[i], err = s.modelToEntityPass(
 			*data[i], key, decrypt)
 
 		if err != nil {
@@ -125,22 +122,20 @@ func (s Stor) InsertPassword(
 	pass entity.Password,
 	key string,
 ) (entity.Password, error) {
-	password, err := entityToModelPass(
-		pass, key, true)
+	s.log.Debug("Insert New Password")
+	password, err := s.entityToModelPass(pass, key, true)
 
 	if err != nil {
 		return pass, err
 	}
 
-	err = s.db.Model(&password).
+	if err = s.db.Model(&password).
 		WithContext(ctx).
-		Create(&password).Error
-
-	if err != nil {
+		Create(&password).Error; err != nil {
 		return pass, err
 	}
 
-	return modelToEntityPass(password, key, true)
+	return s.modelToEntityPass(password, key, true)
 }
 
 func (s Stor) UpdatePassword(
@@ -148,43 +143,39 @@ func (s Stor) UpdatePassword(
 	pass entity.Password,
 	key string,
 ) (entity.Password, error) {
-	password, err := entityToModelPass(
-		pass, key, true)
+	s.log.Debug("Update Password")
+	password, err := s.entityToModelPass(pass, key, true)
 
 	if err != nil {
 		return pass, err
 	}
 
-	err = s.db.Model(&password).
+	if err = s.db.Model(&password).
 		WithContext(ctx).
-		Save(&password).Error
-
-	if err != nil {
+		Save(&password).Error; err != nil {
 		return pass, err
 	}
 
-	return modelToEntityPass(password, key, true)
+	return s.modelToEntityPass(password, key, true)
 }
 
 func (s Stor) DeletePassword(
 	ctx context.Context,
 	pass entity.Password,
 ) (entity.Password, error) {
-	password, err := entityToModelPass(
-		pass, "", false)
+	s.log.Debug("Delete Password")
+	password, err := s.entityToModelPass(pass, "", false)
 
 	if err != nil {
 		return pass, err
 	}
 
-	err = s.db.Model(password).
+	if err = s.db.Model(password).
 		Where("id = ?", password.ID).
 		First(&password).
-		Delete(&password).Error
-
-	if err != nil {
+		Delete(&password).Error; err != nil {
 		return pass, err
 	}
 
-	return modelToEntityPass(password, "", false)
+	return s.modelToEntityPass(password, "", false)
 }
