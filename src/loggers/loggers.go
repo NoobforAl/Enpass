@@ -21,7 +21,7 @@ func New() *logrus.Logger {
 
 			logger = &logrus.Logger{
 				Out:          os.Stderr,
-				Formatter:    new(logrus.TextFormatter),
+				Formatter:    new(logrus.JSONFormatter),
 				Hooks:        make(logrus.LevelHooks),
 				Level:        level,
 				ExitFunc:     os.Exit,

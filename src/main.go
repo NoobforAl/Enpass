@@ -11,6 +11,8 @@ import (
 
 func main() {
 	logger := loggers.New()
+	gin.DefaultWriter = logger.Writer()
+
 	validator := validation.New(logger)
 	store, err := database.New(env.GetDSN(), logger)
 	if err != nil {
