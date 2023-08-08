@@ -112,6 +112,7 @@ func (s Stor) UpdateUser(
 	s.log.Debug("Encrypt Passwords with New user password")
 	for i := range Pass {
 		if err = tx.Model(&Password{}).
+			Where("id = ?", Pass[i].ID).
 			Save(Pass[i]).Error; err != nil {
 			tx.Rollback()
 			return new, err

@@ -41,7 +41,7 @@ func MainApi(
 	r.POST("/createService",
 		controller.NewService(s, v, l))
 
-	r.PUT("/updateUser/:id",
+	r.PUT("/updateUser",
 		controller.UpdateUser(s, v, l))
 	r.PUT("/updatePass/:id",
 		controller.UpdatePass(s, v, l))

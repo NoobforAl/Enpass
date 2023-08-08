@@ -129,6 +129,13 @@ func (s Stor) InsertPassword(
 		return pass, err
 	}
 
+	if err = s.db.Model(&password.Service).
+		WithContext(ctx).
+		Where("id = ?", pass.ServiceID).
+		First(&password.Service).Error; err != nil {
+		return pass, err
+	}
+
 	if err = s.db.Model(&password).
 		WithContext(ctx).
 		Create(&password).Error; err != nil {
@@ -162,6 +169,7 @@ func (s Stor) UpdatePassword(
 func (s Stor) DeletePassword(
 	ctx context.Context,
 	pass entity.Password,
+	key string,
 ) (entity.Password, error) {
 	s.log.Debug("Delete Password")
 	password, err := s.entityToModelPass(pass, "", false)
@@ -177,5 +185,5 @@ func (s Stor) DeletePassword(
 		return pass, err
 	}
 
-	return s.modelToEntityPass(password, "", false)
+	return s.modelToEntityPass(password, key, true)
 }
