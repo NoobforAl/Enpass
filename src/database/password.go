@@ -159,6 +159,8 @@ func (s Stor) UpdatePassword(
 
 	if err = s.db.Model(&password).
 		WithContext(ctx).
+		Where("id = ?", password.ID).
+		First(&Password{}).
 		Save(&password).Error; err != nil {
 		return pass, err
 	}
