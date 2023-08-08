@@ -8,7 +8,7 @@ import (
 	"github.com/NoobforAl/Enpass/contract"
 	"github.com/NoobforAl/Enpass/crypto"
 	"github.com/NoobforAl/Enpass/entity"
-	"gorm.io/driver/sqlite"
+	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -25,7 +25,6 @@ func New(dsn string, log contract.Logger) (Stor, error) {
 	var err error
 	onc.Do(func() {
 		stor.log = log
-
 		log.Debugf("setUp new database with this DSN: %s", dsn)
 		if stor.db, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
