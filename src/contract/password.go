@@ -35,8 +35,9 @@ type Password interface {
 	) (entity.Password, error)
 
 	DeletePassword(
-		context.Context,
-		entity.Password,
+		ctx context.Context,
+		pass entity.Password,
+		key string,
 	) (entity.Password, error)
 }
 

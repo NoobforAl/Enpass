@@ -162,6 +162,7 @@ func (s Stor) UpdatePassword(
 func (s Stor) DeletePassword(
 	ctx context.Context,
 	pass entity.Password,
+	key string,
 ) (entity.Password, error) {
 	s.log.Debug("Delete Password")
 	password, err := s.entityToModelPass(pass, "", false)
@@ -177,5 +178,5 @@ func (s Stor) DeletePassword(
 		return pass, err
 	}
 
-	return s.modelToEntityPass(password, "", false)
+	return s.modelToEntityPass(password, key, true)
 }

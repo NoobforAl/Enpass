@@ -142,6 +142,7 @@ func DeletePass(
 	logger contract.Logger,
 ) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		userID := parser.GetUserID(c, userId)
 		id, err := parser.GetParmInt(c, "id")
 		if err != nil {
 			errs.ErrHandle(c, err)
@@ -154,7 +155,7 @@ func DeletePass(
 
 		pass, err = interactor.
 			New(stor, logger).
-			DeletePass(c, pass)
+			DeletePass(c, pass, userID)
 
 		if err != nil {
 			errs.ErrHandle(c, err)

@@ -81,6 +81,16 @@ func (i interActor) UpdatePass(
 func (i interActor) DeletePass(
 	ctx context.Context,
 	pass entity.Password,
+	userID uint,
 ) (entity.Password, error) {
-	return i.store.DeletePassword(ctx, pass)
+	var key string
+	var err error
+
+	if key, err = caching.
+		CachedPass.
+		GetPass(userID); err != nil {
+		return pass, err
+	}
+
+	return i.store.DeletePassword(ctx, pass, key)
 }
