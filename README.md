@@ -15,7 +15,4 @@ Run with go
 > go mod tidy  
 > go run main.go
 
-### TODO
-
-[ ] Add more endpoint  
-[ ] make uint test
+For see how request to api read [Docs](./doc/).
