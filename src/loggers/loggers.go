@@ -4,14 +4,13 @@ import (
 	"os"
 	"sync"
 
-	"github.com/NoobforAl/Enpass/contract"
 	"github.com/sirupsen/logrus"
 )
 
 var once sync.Once
-var logger contract.Logger
+var logger *logrus.Logger
 
-func New() contract.Logger {
+func New() *logrus.Logger {
 	once.Do(
 		func() {
 			level := logrus.InfoLevel

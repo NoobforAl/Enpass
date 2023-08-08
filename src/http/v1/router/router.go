@@ -10,44 +10,46 @@ func Default(
 	r *gin.Engine,
 	s contract.Store,
 	v contract.Validation,
+	l contract.Logger,
 ) {
 	r.POST("/login",
-		controller.Login(s, v))
+		controller.Login(s, v, l))
 	r.GET("/genRandomPass",
 		controller.GenRandomPass)
 }
 
 func MainApi(
-	api *gin.RouterGroup,
+	r *gin.RouterGroup,
 	s contract.Store,
 	v contract.Validation,
+	l contract.Logger,
 ) {
-	api.Use(controller.AuthMiddleware())
+	r.Use(controller.AuthMiddleware(l))
 
-	api.GET("/allPass",
-		controller.AllPass(s, v))
-	api.GET("/allService",
-		controller.AllService(s, v))
+	r.GET("/allPass",
+		controller.AllPass(s, v, l))
+	r.GET("/allService",
+		controller.AllService(s, v, l))
 
-	api.GET("/pass/:id",
-		controller.FindPass(s, v))
-	api.GET("/service/:id",
-		controller.FindService(s, v))
+	r.GET("/pass/:id",
+		controller.FindPass(s, v, l))
+	r.GET("/service/:id",
+		controller.FindService(s, v, l))
 
-	api.POST("/createPass",
-		controller.NewPass(s, v))
-	api.POST("/createService",
-		controller.NewService(s, v))
+	r.POST("/createPass",
+		controller.NewPass(s, v, l))
+	r.POST("/createService",
+		controller.NewService(s, v, l))
 
-	api.PUT("/updateUser/:id",
-		controller.UpdateUser(s, v))
-	api.PUT("/updatePass/:id",
-		controller.UpdatePass(s, v))
-	api.PUT("/updateService/:id",
-		controller.UpdateService(s, v))
+	r.PUT("/updateUser/:id",
+		controller.UpdateUser(s, v, l))
+	r.PUT("/updatePass/:id",
+		controller.UpdatePass(s, v, l))
+	r.PUT("/updateService/:id",
+		controller.UpdateService(s, v, l))
 
-	api.DELETE("/deletePass/:id",
-		controller.DeletePass(s, v))
-	api.DELETE("/deleteService/:id",
-		controller.DeleteService(s, v))
+	r.DELETE("/deletePass/:id",
+		controller.DeletePass(s, v, l))
+	r.DELETE("/deleteService/:id",
+		controller.DeleteService(s, v, l))
 }

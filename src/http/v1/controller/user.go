@@ -17,6 +17,7 @@ const userIdDB = 1
 func Login(
 	stor contract.Store,
 	validator contract.Validation,
+	logger contract.Logger,
 ) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var login schema.Login
@@ -30,7 +31,8 @@ func Login(
 
 		user := parser.SchemaToEntityLogin(login, userIdDB)
 
-		if _, err = interactor.New(stor).
+		if _, err = interactor.
+			New(stor, logger).
 			FindUser(c, user); err != nil {
 			errs.ErrHandle(c, err)
 			return
@@ -49,6 +51,7 @@ func Login(
 func UpdateUser(
 	stor contract.Store,
 	validator contract.Validation,
+	logger contract.Logger,
 ) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userId := parser.GetUserID(c, userId)
@@ -66,7 +69,8 @@ func UpdateUser(
 		old, new := parser.
 			SchemaToEntityUser(updatePass, userId)
 
-		user, err := interactor.New(stor).
+		user, err := interactor.
+			New(stor, logger).
 			UpdateUser(c, old, new)
 
 		if err != nil {

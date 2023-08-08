@@ -16,6 +16,7 @@ import (
 func NewPass(
 	stor contract.Store,
 	validator contract.Validation,
+	logger contract.Logger,
 ) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var pass schema.Password
@@ -31,7 +32,7 @@ func NewPass(
 		password := parser.SchemaToEntityPass(pass, 0, userID)
 
 		password, err = interactor.
-			New(stor).
+			New(stor, logger).
 			CreatePass(c, password, userID)
 
 		if err != nil {
@@ -46,13 +47,14 @@ func NewPass(
 func AllPass(
 	stor contract.Store,
 	validator contract.Validation,
+	logger contract.Logger,
 ) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := parser.GetUserID(c, userId)
 		decrypt := parser.GetQueryBool(c, "decrypt")
 
 		passwords, err := interactor.
-			New(stor).
+			New(stor, logger).
 			GetAllPassword(c, userID, decrypt)
 
 		if err != nil {
@@ -67,6 +69,7 @@ func AllPass(
 func FindPass(
 	stor contract.Store,
 	validator contract.Validation,
+	logger contract.Logger,
 ) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := parser.GetUserID(c, userId)
@@ -82,7 +85,7 @@ func FindPass(
 		)
 
 		pass, err = interactor.
-			New(stor).
+			New(stor, logger).
 			FindPassword(c, pass, userID, decrypt)
 
 		if err != nil {
@@ -98,6 +101,7 @@ func FindPass(
 func UpdatePass(
 	stor contract.Store,
 	validator contract.Validation,
+	logger contract.Logger,
 ) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var pass schema.Password
@@ -120,7 +124,7 @@ func UpdatePass(
 			pass, uint(id), userID)
 
 		password, err = interactor.
-			New(stor).
+			New(stor, logger).
 			UpdatePass(c, password, userID)
 
 		if err != nil {
@@ -135,6 +139,7 @@ func UpdatePass(
 func DeletePass(
 	stor contract.Store,
 	validator contract.Validation,
+	logger contract.Logger,
 ) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := parser.GetParmInt(c, "id")
@@ -148,7 +153,7 @@ func DeletePass(
 		)
 
 		pass, err = interactor.
-			New(stor).
+			New(stor, logger).
 			DeletePass(c, pass)
 
 		if err != nil {

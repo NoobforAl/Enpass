@@ -14,6 +14,7 @@ import (
 func NewService(
 	stor contract.Store,
 	validator contract.Validation,
+	logger contract.Logger,
 ) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ser schema.Service
@@ -26,7 +27,10 @@ func NewService(
 		}
 
 		service := parser.SchemaToEntityService(ser, 0)
-		service, err = interactor.New(stor).CreateService(c, service)
+		service, err = interactor.
+			New(stor, logger).
+			CreateService(c, service)
+
 		if err != nil {
 			errs.ErrHandle(c, err)
 			return
@@ -39,11 +43,12 @@ func NewService(
 func AllService(
 	stor contract.Store,
 	validator contract.Validation,
+	logger contract.Logger,
 ) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		services, err := interactor.
-			New(stor).
+			New(stor, logger).
 			GetAllService(c)
 
 		if err != nil {
@@ -58,6 +63,7 @@ func AllService(
 func FindService(
 	stor contract.Store,
 	validator contract.Validation,
+	logger contract.Logger,
 ) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := parser.GetParmInt(c, "id")
@@ -70,7 +76,8 @@ func FindService(
 			schema.Service{}, uint(id),
 		)
 
-		service, err = interactor.New(stor).
+		service, err = interactor.
+			New(stor, logger).
 			FindService(c, service)
 		if err != nil {
 			errs.ErrHandle(c, err)
@@ -84,6 +91,7 @@ func FindService(
 func UpdateService(
 	stor contract.Store,
 	validator contract.Validation,
+	logger contract.Logger,
 ) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ser schema.Service
@@ -104,7 +112,7 @@ func UpdateService(
 		service := parser.SchemaToEntityService(ser, uint(id))
 
 		service, err = interactor.
-			New(stor).
+			New(stor, logger).
 			UpdateService(c, service)
 
 		if err != nil {
@@ -119,6 +127,7 @@ func UpdateService(
 func DeleteService(
 	stor contract.Store,
 	validator contract.Validation,
+	logger contract.Logger,
 ) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := parser.GetParmInt(c, "id")
@@ -131,7 +140,8 @@ func DeleteService(
 			schema.Service{}, uint(id),
 		)
 
-		service, err = interactor.New(stor).
+		service, err = interactor.
+			New(stor, logger).
 			DeleteService(c, service)
 		if err != nil {
 			errs.ErrHandle(c, err)
