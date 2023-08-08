@@ -325,3 +325,5 @@ Status Code : 401, 500
     "detail" : "error message"
 }
 ```
+
+Note: If you are request to some path then needed auth only get 401 error status code !
