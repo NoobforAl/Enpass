@@ -129,6 +129,13 @@ func (s Stor) InsertPassword(
 		return pass, err
 	}
 
+	if err = s.db.Model(&password.Service).
+		WithContext(ctx).
+		Where("id = ?", pass.ServiceID).
+		First(&password.Service).Error; err != nil {
+		return pass, err
+	}
+
 	if err = s.db.Model(&password).
 		WithContext(ctx).
 		Create(&password).Error; err != nil {
