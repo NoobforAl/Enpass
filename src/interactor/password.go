@@ -3,8 +3,8 @@ package interactor
 import (
 	"context"
 
-	"github.com/NoobforAl/Enpass/caching"
 	"github.com/NoobforAl/Enpass/entity"
+	"github.com/NoobforAl/Enpass/lib/caching"
 )
 
 func (i interActor) CreatePass(

@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	"github.com/NoobforAl/Enpass/contract"
-	"github.com/NoobforAl/Enpass/crypto"
 	"github.com/NoobforAl/Enpass/entity"
+	"github.com/NoobforAl/Enpass/lib/crypto"
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

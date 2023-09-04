@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/NoobforAl/Enpass/crypto"
 	"github.com/NoobforAl/Enpass/entity"
+	"github.com/NoobforAl/Enpass/lib/crypto"
 	"gorm.io/gorm"
 )
 

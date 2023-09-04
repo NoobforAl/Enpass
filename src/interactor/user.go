@@ -3,10 +3,10 @@ package interactor
 import (
 	"context"
 
-	"github.com/NoobforAl/Enpass/caching"
-	"github.com/NoobforAl/Enpass/crypto"
 	"github.com/NoobforAl/Enpass/entity"
 	errs "github.com/NoobforAl/Enpass/errors"
+	"github.com/NoobforAl/Enpass/lib/caching"
+	"github.com/NoobforAl/Enpass/lib/crypto"
 )
 
 func (i interActor) FindUser(
