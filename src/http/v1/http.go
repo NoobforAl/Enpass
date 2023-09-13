@@ -13,12 +13,16 @@ import (
 
 func HttpApp() *gin.Engine {
 	logger := loggers.New()
+	env.EnvInit(logger)
+
 	validator := validation.New(logger)
 	cache := caching.New(env.GetLifeTime())
 	store, err := database.New(env.GetDSN(), logger)
 	if err != nil {
 		logger.Panic(err)
 	}
+
+	gin.SetMode(env.GetGinMode())
 
 	r := gin.Default()
 	baseConfig := &controller.BaseConfig{
