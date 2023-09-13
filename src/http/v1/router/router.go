@@ -17,15 +17,15 @@ func MainApi(conf *controller.BaseConfig) {
 
 	api.PUT("/user", controller.UpdateUser(conf))
 
-	api.GET("/password", controller.FindPass(conf))
 	api.POST("/password", controller.NewPass(conf))
-	api.GET("/password/:id", controller.AllPass(conf))
+	api.GET("/password", controller.AllPass(conf))
+	api.GET("/password/:id", controller.FindPass(conf))
 	api.PUT("/password/:id", controller.UpdatePass(conf))
 	api.DELETE("/password/:id", controller.DeletePass(conf))
 
-	api.GET("/service", controller.FindService(conf))
 	api.POST("/service", controller.NewService(conf))
-	api.GET("/service/:id", controller.AllService(conf))
+	api.GET("/service", controller.AllService(conf))
+	api.GET("/service/:id", controller.FindService(conf))
 	api.PUT("/service/:id", controller.UpdateService(conf))
 	api.DELETE("/service/:id", controller.DeleteService(conf))
 }
