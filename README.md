@@ -11,8 +11,7 @@ For run this program you can use docker or normally run go program but before ru
 Run with docker
 > docker compose up
 
-Run with go
-> go mod tidy  
-> go run main.go
+Run with Make
+> make run
 
 For see how request to api read [Docs](./doc/).
