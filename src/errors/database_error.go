@@ -3,6 +3,7 @@ package errors
 import (
 	"errors"
 
+	"github.com/NoobforAl/Enpass/lib/crypto"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -18,10 +19,10 @@ var (
 	ErrNotEnoughRecord = errors.New("not enough record for delete")
 
 	// security validation error
-	ErrEncrypt      = errors.New("encrypt Error:")
-	ErrDecrypt      = errors.New("decrypt Error:")
-	ErrTextIsShort  = errors.New("text too short")
-	ErrHashNotMatch = errors.New("hash not match")
+	ErrEncrypt      = crypto.ErrEncrypt
+	ErrDecrypt      = crypto.ErrDecrypt
+	ErrTextIsShort  = crypto.ErrTextIsShort
+	ErrHashNotMatch = crypto.ErrHashNotMatch
 
 	// all database error gorm
 

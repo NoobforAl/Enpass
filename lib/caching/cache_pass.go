@@ -3,13 +3,7 @@ package caching
 import (
 	"sync"
 	"time"
-
-	env "github.com/NoobforAl/Enpass/config_loader"
-	errs "github.com/NoobforAl/Enpass/errors"
 )
-
-var CachedPass savedPass
-var timeDelay = env.GetLifeTime()
 
 type SendCachePass struct {
 	id       uint
@@ -20,13 +14,14 @@ type savedPass struct {
 	passwords map[uint]string
 	mux       sync.Mutex
 	ch        chan SendCachePass
+	timeDelay time.Duration
 }
 
-func init() {
-	// create new password saver
-	CachedPass = savedPass{
+func New(timeDelay time.Duration) *savedPass {
+	return &savedPass{
 		passwords: make(map[uint]string, 1),
 		ch:        make(chan SendCachePass),
+		timeDelay: timeDelay,
 	}
 }
 
@@ -35,7 +30,7 @@ func (sp *savedPass) GetPass(id uint) (string, error) {
 	defer sp.mux.Unlock()
 	str, ok := sp.passwords[id]
 	if !ok {
-		return "", errs.ErrNotFoundPass
+		return "", ErrNotFoundPass
 	}
 	return str, nil
 }
@@ -48,6 +43,7 @@ func (sp *savedPass) SetPass(id uint, pass string) {
 }
 
 func (sp *savedPass) DeletePass(id uint) {
+	timer := time.NewTicker(sp.timeDelay)
 	for {
 		select {
 		case pass := <-sp.ch:
@@ -56,10 +52,11 @@ func (sp *savedPass) DeletePass(id uint) {
 				continue
 			}
 			sp.mux.Lock()
+			timer.Reset(sp.timeDelay)
 			sp.passwords[pass.id] = pass.password
 			sp.mux.Unlock()
 
-		case <-time.After(timeDelay):
+		case <-timer.C:
 			sp.mux.Lock()
 			defer sp.mux.Unlock()
 			delete(sp.passwords, id)

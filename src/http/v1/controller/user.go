@@ -8,37 +8,33 @@ import (
 	"github.com/NoobforAl/Enpass/interactor"
 	"github.com/NoobforAl/Enpass/schema"
 
-	"github.com/NoobforAl/Enpass/contract"
 	"github.com/gin-gonic/gin"
 )
 
 const userIdDB = 1
 
-func Login(
-	stor contract.Store,
-	validator contract.Validation,
-	logger contract.Logger,
-) gin.HandlerFunc {
+func Login(conf *BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var login schema.Login
-		var err error
-
-		if err = validator.
-			ParsLoginUser(c, &login); err != nil {
+		err := conf.Validation.ParsLoginUser(c, &login)
+		if err != nil {
 			errs.ErrHandle(c, err)
 			return
 		}
 
 		user := parser.SchemaToEntityLogin(login, userIdDB)
+		user, err = interactor.New(
+			conf.Stor,
+			conf.Logger,
+			conf.Cache,
+		).FindUser(c, user)
 
-		if _, err = interactor.
-			New(stor, logger).
-			FindUser(c, user); err != nil {
+		if err != nil {
 			errs.ErrHandle(c, err)
 			return
 		}
 
-		t, err := generateToken(userIdDB)
+		t, err := generateToken(user.ID)
 		if err != nil {
 			errs.ErrHandle(c, err)
 			return
@@ -48,20 +44,12 @@ func Login(
 	}
 }
 
-func UpdateUser(
-	stor contract.Store,
-	validator contract.Validation,
-	logger contract.Logger,
-) gin.HandlerFunc {
+func UpdateUser(conf *BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userId := parser.GetUserID(c, userId)
 		var updatePass schema.UpdateUser
-		var err error
-
-		if err = validator.
-			ParsUpdateUser(
-				c, &updatePass,
-			); err != nil {
+		err := conf.Validation.ParsUpdateUser(c, &updatePass)
+		if err != nil {
 			errs.ErrHandle(c, err)
 			return
 		}
@@ -69,9 +57,11 @@ func UpdateUser(
 		old, new := parser.
 			SchemaToEntityUser(updatePass, userId)
 
-		user, err := interactor.
-			New(stor, logger).
-			UpdateUser(c, old, new)
+		user, err := interactor.New(
+			conf.Stor,
+			conf.Logger,
+			conf.Cache,
+		).UpdateUser(c, old, new)
 
 		if err != nil {
 			errs.ErrHandle(c, err)

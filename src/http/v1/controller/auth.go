@@ -8,7 +8,6 @@ import (
 	"time"
 
 	env "github.com/NoobforAl/Enpass/config_loader"
-	"github.com/NoobforAl/Enpass/contract"
 	errs "github.com/NoobforAl/Enpass/errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -30,7 +29,7 @@ func init() {
 	}
 }
 
-func AuthMiddleware(log contract.Logger) gin.HandlerFunc {
+func AuthMiddleware(conf *BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
 

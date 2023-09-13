@@ -7,30 +7,33 @@ import (
 	"encoding/base64"
 	"errors"
 	"io"
-
-	errs "github.com/NoobforAl/Enpass/errors"
 )
 
 const nonceSize = 12
 
 func Encrypt(key, text string) (string, error) {
+	key, err := fixLengthKey(key)
+	if err != nil {
+		return "", err
+	}
+
 	block, err := aes.NewCipher([]byte(key))
 	if err != nil {
 		return "",
-			errors.Join(errs.ErrEncrypt, err)
+			errors.Join(ErrEncrypt, err)
 	}
 
 	nonce := make([]byte, nonceSize)
 	if _, err := io.ReadFull(
 		rand.Reader, nonce,
 	); err != nil {
-		return "", errors.Join(errs.ErrEncrypt, err)
+		return "", errors.Join(ErrEncrypt, err)
 	}
 
 	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return "",
-			errors.Join(errs.ErrEncrypt, err)
+			errors.Join(ErrEncrypt, err)
 	}
 
 	ciphertext := aesgcm.Seal(nil, nonce, []byte(text), nil)

@@ -5,24 +5,26 @@ import (
 	"crypto/cipher"
 	"encoding/base64"
 	"errors"
-
-	errs "github.com/NoobforAl/Enpass/errors"
 )
 
 func Decrypt(key, text string) (string, error) {
+	key, err := fixLengthKey(key)
+	if err != nil {
+		return "", err
+	}
+
 	textDecoded, err := base64.
 		StdEncoding.
 		DecodeString(text)
 
 	if err != nil {
 		return "",
-			errors.Join(errs.ErrDecrypt, err)
+			errors.Join(ErrDecrypt, err)
 	}
 
 	if len(textDecoded) < nonceSize {
 		return "",
-			errors.Join(errs.ErrDecrypt,
-				errs.ErrTextIsShort)
+			errors.Join(ErrDecrypt, ErrTextIsShort)
 	}
 
 	nonce := textDecoded[:nonceSize]
@@ -31,13 +33,13 @@ func Decrypt(key, text string) (string, error) {
 	block, err := aes.NewCipher([]byte(key))
 	if err != nil {
 		return "",
-			errors.Join(errs.ErrDecrypt, err)
+			errors.Join(ErrDecrypt, err)
 	}
 
 	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return "",
-			errors.Join(errs.ErrDecrypt, err)
+			errors.Join(ErrDecrypt, err)
 	}
 
 	plaintextBytes, err := aesgcm.Open(
@@ -45,7 +47,7 @@ func Decrypt(key, text string) (string, error) {
 
 	if err != nil {
 		return "",
-			errors.Join(errs.ErrDecrypt, err)
+			errors.Join(ErrDecrypt, err)
 	}
 
 	plaintext := string(plaintextBytes)

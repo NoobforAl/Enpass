@@ -1,5 +1,7 @@
 package errors
 
-import "errors"
+import (
+	"github.com/NoobforAl/Enpass/lib/caching"
+)
 
-var ErrNotFoundPass = errors.New("Not found Password saved")
+var ErrNotFoundPass = caching.ErrNotFoundPass

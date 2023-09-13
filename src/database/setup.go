@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	"github.com/NoobforAl/Enpass/contract"
-	"github.com/NoobforAl/Enpass/crypto"
 	"github.com/NoobforAl/Enpass/entity"
+	"github.com/NoobforAl/Enpass/lib/crypto"
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -71,7 +71,7 @@ func createUserIfNotExist() error {
 
 	if user.Password == "" {
 		stor.log.Warn("User Not Found Create New User")
-		defaultPassword := "1111111111111111"
+		defaultPassword := "1111"
 		user.Password = defaultPassword
 		user.Password = crypto.HashSha256(user.Password)
 		user.Password, err = crypto.Encrypt(

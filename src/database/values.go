@@ -1,8 +1,8 @@
 package database
 
 import (
-	"github.com/NoobforAl/Enpass/crypto"
 	errs "github.com/NoobforAl/Enpass/errors"
+	"github.com/NoobforAl/Enpass/lib/crypto"
 )
 
 type Values struct {
