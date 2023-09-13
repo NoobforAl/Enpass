@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 
 	errs "github.com/NoobforAl/Enpass/errors"
@@ -85,7 +84,6 @@ func FindPass(conf *BaseConfig) gin.HandlerFunc {
 			return
 		}
 
-		fmt.Println(pass)
 		c.JSON(http.StatusOK, pass)
 	}
 }
