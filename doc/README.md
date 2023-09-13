@@ -1,3 +1,26 @@
+# How run app ?
+
+For run this program you can use docker or normally run go program but before run program you can create a .env file to be like .evn.example.
+
+If you want run without .env file use CLI help command.
+
+```text
+Usage of ./enpass <command>:
+  -S string     set your ip:port (default "0.0.0.0:1111")
+  -d            run debug mode
+  -dsn string   database path (default "./db.sqlite")
+  -lf uint      life time (default 10)
+  -sk string    set secret key
+```
+
+Run with docker
+> docker compose up
+
+Run with Make
+> make run
+
+---
+
 # Api Document
 
 For Better request you can use postman file on postman folder.
@@ -54,7 +77,7 @@ Header Name : < Authorization >
 ### Create New Service
 
 Endpoints: ( POST )
-> 0.0.0.0:1111/api/createService
+> 0.0.0.0:1111/api/service
 
 This endpoint for create new service.
 
@@ -80,7 +103,7 @@ Response:
 ### Update Service
 
 Endpoints: ( PUT )
-> 0.0.0.0:1111/api/updateService/:id
+> 0.0.0.0:1111/api/service/:id
 
 Need Parm **id**.
 
@@ -120,7 +143,7 @@ Response:
 ### Get All Service
 
 Endpoints: ( GET )
-> 0.0.0.0:1111/api/allService
+> 0.0.0.0:1111/api/service
 
 Response:
 
@@ -136,7 +159,7 @@ Response:
 ### Delete Service
 
 Endpoints: ( Delete )
-> 0.0.0.0:1111/api/deleteService/:id
+> 0.0.0.0:1111/api/service/:id
 
 Need Parm **id**.
 
@@ -154,7 +177,7 @@ Response:
 ### Create Password
 
 Endpoints: ( POST )
-> 0.0.0.0:1111/api/createPass
+> 0.0.0.0:1111/api/password
 
 Request:
 
@@ -182,7 +205,7 @@ Response:
 ### Delete Password
 
 Endpoints: ( DELETE )
-> 0.0.0.0:1111/api/deletePass/:id
+> 0.0.0.0:1111/api/password/:id
 
 Need param < id >.
 
@@ -201,7 +224,7 @@ Response:
 ### Update Password
 
 Endpoints: ( PUT )
-> 0.0.0.0:1111/api/updatePass/:id
+> 0.0.0.0:1111/api/password/:id
 
 Need param < id >.
 
@@ -231,11 +254,9 @@ Response:
 ### Get Password
 
 Endpoints: ( GET )
-> 0.0.0.0:1111/api/pass/:id/?decrypt=true
+> 0.0.0.0:1111/api/password/:id
 
 Need param < id >.
-
-Query decrypt is optional. ( type is bool )
 
 Response: ( with decrypt )
 
@@ -249,22 +270,10 @@ Response: ( with decrypt )
 }
 ```
 
-Response: ( without decrypt )
-
-```json
-{
-    "passid": 1,
-    "serviceid": 1,
-    "username": "BNA6+NOivbSzguaDA4rBexCPd16EI90DpmM2xhlf0a64",
-    "password": "Yt6+TBTGu/bBa/BPUK2pKca/KlhpHqJuoLWisbUDA/fd",
-    "note": "wA5p1S66MErvIj8DkDs0t4MiFctjT/RniI4QcHzeLlJb"
-}
-```
-
 ### Get All Password
 
 Endpoints: ( GET )
-> 0.0.0.0:1111/api/allPass?decrypt=false
+> 0.0.0.0:1111/api/password
 
 Query decrypt is optional. ( type is bool )
 
@@ -275,16 +284,16 @@ Response:
     {
         "passid": 2,
         "serviceid": 1,
-        "username": "YYWxe0TX0dw8u9ATKrFxgEy8em5uUonKJG4ZdUb3rbk=",
-        "password": "n/inlMMBcZVtylKHX8JU/neU7ay6mnsz4uX7hprFYCM=",
-        "note": "Y/tldFPQezjLgTKWGs2Wj86TeadoPzra4Sd9U5VORvQ="
+        "username": "test",
+        "password": "test",
+        "note": "test"
     },
     {
         "passid": 3,
         "serviceid": 1,
-        "username": "9zgI29jjasskZiG8A6Yj5qYCYr8B7S24cMPmbBEcAxQ=",
-        "password": "Lu1lIawtqH2fRseHQxk4bFScS166upj0gCwMCdrM+S0=",
-        "note": "eMygc7T+26Ssrfx82YwsV68XbUES4sLsl25mPkGOIOM="
+        "username": "test",
+        "password": "test",
+        "note": "test"
     }
 ]
 ```
@@ -294,14 +303,14 @@ Response:
 ### Update User Password
 
 Endpoints: ( PUT )
-> 0.0.0.0:1111/api/updateUser
+> 0.0.0.0:1111/api/user
 
 Request:
 
 ```json
 {
-    "old": "1111111111111111",
-    "new": "1111111111111112"
+    "old": "1111",
+    "new": "2222"
 }
 ```
 
