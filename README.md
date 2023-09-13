@@ -6,6 +6,8 @@ Very Simple Personal Encrypted Password Manager!
 
 This program save your password with your key encrypted all data password, in this time program only run on the server without any UI & Command Line.
 
+First time you run program, by default password is `1111`.
+
 Program one time show your password then your login and setup token on the header.
 
 ## Doc
