@@ -5,7 +5,6 @@ import (
 
 	"github.com/NoobforAl/Enpass/entity"
 	errs "github.com/NoobforAl/Enpass/errors"
-	"github.com/NoobforAl/Enpass/lib/caching"
 	"github.com/NoobforAl/Enpass/lib/crypto"
 )
 
@@ -20,9 +19,7 @@ func (i interActor) FindUser(
 	}
 
 	i.log.Debug("check decrypt password")
-	p, err := crypto.Decrypt(
-		user.Password, u.Password)
-
+	p, err := crypto.Decrypt(user.Password, u.Password)
 	if err != nil {
 		return user, err
 	}
@@ -32,16 +29,16 @@ func (i interActor) FindUser(
 		return user, errs.ErrNotMatchPassword
 	}
 
-	if _, err = caching.CachedPass.
-		GetPass(user.ID); err != nil {
+	_, err = i.cache.GetPass(user.ID)
+	if err != nil {
 		i.log.Debug("cache pass delete not found," +
 			"start new delete password cache," +
 			"after set timed.")
-		go caching.CachedPass.DeletePass(user.ID)
+		go i.cache.DeletePass(user.ID)
 	}
 
 	i.log.Debug("set password in cache")
-	caching.CachedPass.SetPass(user.ID, user.Password)
+	i.cache.SetPass(user.ID, user.Password)
 	return user, nil
 }
 
@@ -49,13 +46,9 @@ func (i interActor) UpdateUser(
 	ctx context.Context,
 	old, new entity.User,
 ) (entity.User, error) {
-	var pass string
-	var err error
-
 	i.log.Debug("update user password")
-	if pass, err = caching.
-		CachedPass.
-		GetPass(old.ID); err != nil {
+	pass, err := i.cache.GetPass(old.ID)
+	if err != nil {
 		return new, err
 	}
 

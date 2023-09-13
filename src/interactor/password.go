@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/NoobforAl/Enpass/entity"
-	"github.com/NoobforAl/Enpass/lib/caching"
 )
 
 func (i interActor) CreatePass(
@@ -12,15 +11,10 @@ func (i interActor) CreatePass(
 	pass entity.Password,
 	userID uint,
 ) (entity.Password, error) {
-	var key string
-	var err error
-
-	if key, err = caching.
-		CachedPass.
-		GetPass(userID); err != nil {
+	key, err := i.cache.GetPass(userID)
+	if err != nil {
 		return pass, err
 	}
-
 	return i.store.InsertPassword(ctx, pass, key)
 }
 
@@ -29,36 +23,23 @@ func (i interActor) GetAllPassword(
 	userID uint,
 	decrypt bool,
 ) ([]entity.Password, error) {
-	var key string
-	var err error
-
-	if key, err = caching.
-		CachedPass.
-		GetPass(userID); err != nil {
+	key, err := i.cache.GetPass(userID)
+	if err != nil {
 		return nil, err
 	}
-
-	return i.store.GetManyPassword(
-		ctx, key, decrypt)
+	return i.store.GetManyPassword(ctx, key, true)
 }
 
 func (i interActor) FindPassword(
 	ctx context.Context,
 	pass entity.Password,
 	userID uint,
-	decrypt bool,
 ) (entity.Password, error) {
-	var key string
-	var err error
-
-	if key, err = caching.
-		CachedPass.
-		GetPass(userID); err != nil {
+	key, err := i.cache.GetPass(userID)
+	if err != nil {
 		return pass, err
 	}
-
-	return i.store.GetPassword(
-		ctx, pass, key, decrypt)
+	return i.store.GetPassword(ctx, pass, key, true)
 }
 
 func (i interActor) UpdatePass(
@@ -66,15 +47,10 @@ func (i interActor) UpdatePass(
 	pass entity.Password,
 	userID uint,
 ) (entity.Password, error) {
-	var key string
-	var err error
-
-	if key, err = caching.
-		CachedPass.
-		GetPass(userID); err != nil {
+	key, err := i.cache.GetPass(userID)
+	if err != nil {
 		return pass, err
 	}
-
 	return i.store.UpdatePassword(ctx, pass, key)
 }
 
@@ -83,14 +59,9 @@ func (i interActor) DeletePass(
 	pass entity.Password,
 	userID uint,
 ) (entity.Password, error) {
-	var key string
-	var err error
-
-	if key, err = caching.
-		CachedPass.
-		GetPass(userID); err != nil {
+	key, err := i.cache.GetPass(userID)
+	if err != nil {
 		return pass, err
 	}
-
 	return i.store.DeletePassword(ctx, pass, key)
 }
