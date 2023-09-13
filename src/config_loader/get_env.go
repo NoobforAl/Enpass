@@ -9,9 +9,17 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var dsn string
-var secretKey []byte
-var tokenLifeTime time.Duration
+const (
+	DSN        = "DSN"
+	LIFETIME   = "LIFETIME"
+	SECRET_KEY = "SECRET_KEY"
+)
+
+var (
+	dsn           string
+	secretKey     []byte
+	tokenLifeTime time.Duration
+)
 
 func init() {
 	if godotenv.Load("./.env") != nil {
@@ -19,13 +27,13 @@ func init() {
 	}
 
 	// get dsn sqlite
-	dsn = os.Getenv("DSN")
+	dsn = os.Getenv(DSN)
 
 	// get dsn sqlite
-	secretKey = []byte(os.Getenv("SECRET_KEY"))
+	secretKey = []byte(os.Getenv(SECRET_KEY))
 
 	// setup life time
-	delay := os.Getenv("LIFETIME")
+	delay := os.Getenv(LIFETIME)
 	d, err := strconv.Atoi(delay)
 	if d == 0 && err != nil {
 		d = 1
