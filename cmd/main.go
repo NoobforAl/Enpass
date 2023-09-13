@@ -29,6 +29,7 @@ func init() {
 	flag.Parse()
 
 	os.Setenv("DSN", *dsn)
+	os.Setenv("GIN_MODE", "release")
 	os.Setenv("SECRET_KEY", *secret_key)
 	os.Setenv("LIFETIME", strconv.Itoa(int(*life_time)))
 
