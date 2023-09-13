@@ -2,16 +2,10 @@ FROM golang:1.20
 
 WORKDIR /app
 
-COPY  . /app/
+COPY . /app/
 
-RUN go mod tidy
-
-RUN go build main.go
-
-RUN mv /app/main /tmp/main
-
+RUN go build -o /tmp/enpass ./cmd/main.go
 RUN rm -rf /app/*   
+RUN mv /tmp/enpass /app/enpass 
 
-RUN mv /tmp/main /app/main 
-
-CMD [ "./main" ]
+CMD [ "./enpass" ]
