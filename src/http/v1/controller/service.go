@@ -3,7 +3,6 @@ package controller
 import (
 	"net/http"
 
-	"github.com/NoobforAl/Enpass/contract"
 	errs "github.com/NoobforAl/Enpass/errors"
 	"github.com/NoobforAl/Enpass/http/v1/parser"
 	"github.com/NoobforAl/Enpass/interactor"
@@ -11,25 +10,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewService(
-	stor contract.Store,
-	validator contract.Validation,
-	logger contract.Logger,
-) gin.HandlerFunc {
+func NewService(conf *BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ser schema.Service
-		var err error
-
-		if err = validator.
-			ParsService(c, &ser); err != nil {
+		err := conf.Validation.ParsService(c, &ser)
+		if err != nil {
 			errs.ErrHandle(c, err)
 			return
 		}
 
 		service := parser.SchemaToEntityService(ser, 0)
-		service, err = interactor.
-			New(stor, logger).
-			CreateService(c, service)
+		service, err = interactor.New(
+			conf.Stor,
+			conf.Logger,
+			conf.Cache,
+		).CreateService(c, service)
 
 		if err != nil {
 			errs.ErrHandle(c, err)
@@ -40,16 +35,14 @@ func NewService(
 	}
 }
 
-func AllService(
-	stor contract.Store,
-	validator contract.Validation,
-	logger contract.Logger,
-) gin.HandlerFunc {
+func AllService(conf *BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		services, err := interactor.
-			New(stor, logger).
-			GetAllService(c)
+		services, err := interactor.New(
+			conf.Stor,
+			conf.Logger,
+			conf.Cache,
+		).GetAllService(c)
 
 		if err != nil {
 			errs.ErrHandle(c, err)
@@ -60,11 +53,7 @@ func AllService(
 	}
 }
 
-func FindService(
-	stor contract.Store,
-	validator contract.Validation,
-	logger contract.Logger,
-) gin.HandlerFunc {
+func FindService(conf *BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := parser.GetParmInt(c, "id")
 		if err != nil {
@@ -76,9 +65,12 @@ func FindService(
 			schema.Service{}, uint(id),
 		)
 
-		service, err = interactor.
-			New(stor, logger).
-			FindService(c, service)
+		service, err = interactor.New(
+			conf.Stor,
+			conf.Logger,
+			conf.Cache,
+		).FindService(c, service)
+
 		if err != nil {
 			errs.ErrHandle(c, err)
 			return
@@ -88,17 +80,12 @@ func FindService(
 	}
 }
 
-func UpdateService(
-	stor contract.Store,
-	validator contract.Validation,
-	logger contract.Logger,
-) gin.HandlerFunc {
+func UpdateService(conf *BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ser schema.Service
-		var err error
+		err := conf.Validation.ParsService(c, &ser)
 
-		if err = validator.
-			ParsService(c, &ser); err != nil {
+		if err != nil {
 			errs.ErrHandle(c, err)
 			return
 		}
@@ -111,9 +98,11 @@ func UpdateService(
 
 		service := parser.SchemaToEntityService(ser, uint(id))
 
-		service, err = interactor.
-			New(stor, logger).
-			UpdateService(c, service)
+		service, err = interactor.New(
+			conf.Stor,
+			conf.Logger,
+			conf.Cache,
+		).UpdateService(c, service)
 
 		if err != nil {
 			errs.ErrHandle(c, err)
@@ -124,11 +113,7 @@ func UpdateService(
 	}
 }
 
-func DeleteService(
-	stor contract.Store,
-	validator contract.Validation,
-	logger contract.Logger,
-) gin.HandlerFunc {
+func DeleteService(conf *BaseConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := parser.GetParmInt(c, "id")
 		if err != nil {
@@ -140,9 +125,11 @@ func DeleteService(
 			schema.Service{}, uint(id),
 		)
 
-		service, err = interactor.
-			New(stor, logger).
-			DeleteService(c, service)
+		service, err = interactor.New(
+			conf.Stor,
+			conf.Logger,
+			conf.Cache,
+		).DeleteService(c, service)
 		if err != nil {
 			errs.ErrHandle(c, err)
 			return
