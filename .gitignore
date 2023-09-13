@@ -26,3 +26,6 @@ src/tmp
 
 # .env file
 .env
+
+# build folder release
+build/
