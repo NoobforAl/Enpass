@@ -16,7 +16,7 @@ For see how request to api read [Docs](./doc/).
 
 ## TODO
 
-[] Add UI (web, app)
-[] Add Command Line for get password or add new password
-[] Add test Core
-[] Improve Readme Notes
+[ ] Add UI (web, app)  
+[ ] Add Command Line for get password or add new password  
+[ ] Add test Core  
+[ ] Improve Readme Notes  
